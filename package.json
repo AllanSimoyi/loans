@@ -13,6 +13,7 @@
     "format": "prettier --write .",
     "format:repo": "npm run format && npm run lint -- --fix",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
+    "lint_tsc": "npm run lint && tsc --noemit",
     "setup": "prisma generate && prisma migrate deploy && prisma db seed",
     "start": "cross-env NODE_ENV=production node ./build/server.js",
     "start:mocks": "cross-env NODE_ENV=production node --require ./mocks --require dotenv/config ./build/server.js",
@@ -99,7 +100,7 @@
     "typescript": "^5.2.2",
     "vite": "^4.5.0",
     "vite-tsconfig-paths": "^4.2.1",
-    "vitest": "^0.34.6"
+    "vitest": "0.34.3"
   },
   "engines": {
     "node": ">=18.0.0"

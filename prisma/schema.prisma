@@ -8,31 +8,188 @@ generator client {
 }
 
 model User {
-  id    String @id @default(cuid())
-  email String @unique
-
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  password Password?
-  notes    Note[]
+  emailAddress   String  @unique @db.VarChar(50)
+  hashedPassword String  @default("") @db.VarChar(1000)
+  fullName       String  @db.VarChar(100)
+  kind           String  @db.VarChar(20)
+  deactivated    Boolean @default(false)
+
+  lenders      Lender[]
+  applications Application[]
 }
 
-model Password {
-  hash String
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String @unique
-}
-
-model Note {
-  id    String @id @default(cuid())
-  title String
-  body  String
-
+model Lender {
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  logo         String  @db.VarChar(500)
+  logoPublicId String?
+  logoWidth    Int?
+  logoHeight   Int?
+
+  minTenure       Int
+  maxTenure       Int
+  minAmount       Decimal @db.Decimal(19, 2)
+  maxAmount       Decimal @db.Decimal(19, 2)
+  monthlyInterest Decimal @db.Decimal(19, 2)
+  adminFee        Decimal @db.Decimal(19, 2)
+  applicationFee  Decimal @db.Decimal(19, 2)
+  paid            Boolean @default(false)
+  deactivated     Boolean @default(false)
+
+  channels              Channel[]
+  employmentPreferences EmploymentPreference[]
 }
+
+model Application {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deactivated Boolean  @default(false)
+
+  applicantId Int
+  applicant   User @relation(fields: [applicantId], references: [id])
+
+  state      String @db.VarChar(20)
+  moreDetail String @db.VarChar(800)
+
+  bank       String @db.VarChar(100)
+  bankBranch String @db.VarChar(200)
+  accNumber  String @db.VarChar(20)
+  accName    String @db.VarChar(200)
+
+  loanPurpose     String  @db.VarChar(300)
+  amtRequired     Decimal @db.Decimal(19, 2)
+  repaymentPeriod Int
+
+  title       String   @db.VarChar(100)
+  fullName    String   @db.VarChar(100)
+  DOB         DateTime
+  nationalID  String   @db.VarChar(20)
+  phoneNumber String   @db.VarChar(20)
+  resAddress  String   @db.VarChar(300)
+  natureOfRes String   @db.VarChar(50)
+
+  fullMaidenNames  String? @db.VarChar(100)
+  fullNameOfSpouse String? @db.VarChar(100)
+  maritalStatus    String  @db.VarChar(20)
+
+  profession    String   @db.VarChar(100)
+  employer      String   @db.VarChar(100)
+  employedSince DateTime
+  grossIncome   Decimal  @db.Decimal(19, 2)
+  netIncome     Decimal  @db.Decimal(19, 2)
+
+  firstNokFullName     String @db.VarChar(100)
+  firstNokRelationship String @db.VarChar(100)
+  firstNokEmployer     String @db.VarChar(100)
+  firstNokResAddress   String @db.VarChar(200)
+  firstNokPhoneNumber  String @db.VarChar(20)
+
+  secondNokFullName     String @db.VarChar(100)
+  secondNokRelationship String @db.VarChar(100)
+  secondNokEmployer     String @db.VarChar(100)
+  secondNokResAddress   String @db.VarChar(200)
+  secondNokPhoneNumber  String @db.VarChar(20)
+
+  kycDocs    KycDoc[]
+  channels   Channel[]
+  priorLoans PriorLoan[]
+}
+
+model PriorLoan {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applicationId Int
+  application   Application @relation(fields: [applicationId], references: [id])
+
+  lender           String   @db.VarChar(100)
+  expiryDate       DateTime
+  amount           Decimal  @db.Decimal(19, 2)
+  monthlyRepayment Decimal  @db.Decimal(19, 2)
+  balance          Decimal  @db.Decimal(19, 2)
+}
+
+model KycDoc {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applicationId Int
+  application   Application @relation(fields: [applicationId], references: [id])
+
+  label    String @db.VarChar(100)
+  publicId String
+  width    Int?
+  height   Int?
+}
+
+model Channel {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applicationId Int
+  application   Application @relation(fields: [applicationId], references: [id])
+
+  lenderId Int
+  lender   Lender @relation(fields: [lenderId], references: [id])
+
+  decisions Decision[]
+}
+
+model Decision {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  channelId Int
+  channel   Channel @relation(fields: [channelId], references: [id])
+
+  decision String @db.VarChar(40)
+  comment  String @db.VarChar(800)
+}
+
+model EmploymentType {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employmentType String @db.VarChar(100)
+
+  employmentPreferences EmploymentPreference[]
+}
+
+model EmploymentPreference {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lenderId Int
+  lender   Lender @relation(fields: [lenderId], references: [id])
+
+  employmentTypeId Int
+  employmentType   EmploymentType @relation(fields: [employmentTypeId], references: [id])
+}
+
+// model Note {
+//   id    String @id @default(cuid())
+//   title String
+//   body  String
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+//   userId String
+// }

@@ -1,18 +1,18 @@
-import { PrismaClient } from "@prisma/client";
-import invariant from "tiny-invariant";
+import { PrismaClient } from '@prisma/client';
+import invariant from 'tiny-invariant';
 
-import { singleton } from "./singleton.server";
+import { singleton } from './singleton.server';
 
 // Hard-code a unique key, so we can look up the client when this module gets re-imported
-const prisma = singleton("prisma", getPrismaClient);
+const prisma = singleton('prisma', getPrismaClient);
 
 function getPrismaClient() {
   const { DATABASE_URL } = process.env;
-  invariant(typeof DATABASE_URL === "string", "DATABASE_URL env var not set");
+  invariant(typeof DATABASE_URL === 'string', 'DATABASE_URL env var not set');
 
   const databaseUrl = new URL(DATABASE_URL);
 
-  const isLocalHost = databaseUrl.hostname === "localhost";
+  const isLocalHost = databaseUrl.hostname === 'localhost';
 
   const PRIMARY_REGION = isLocalHost ? null : process.env.PRIMARY_REGION;
   const FLY_REGION = isLocalHost ? null : process.env.FLY_REGION;
@@ -20,13 +20,13 @@ function getPrismaClient() {
   const isReadReplicaRegion = !PRIMARY_REGION || PRIMARY_REGION === FLY_REGION;
 
   if (!isLocalHost) {
-    if (databaseUrl.host.endsWith(".internal")) {
+    if (databaseUrl.host.endsWith('.internal')) {
       databaseUrl.host = `${FLY_REGION}.${databaseUrl.host}`;
     }
 
     if (!isReadReplicaRegion) {
       // 5433 is the read-replica port
-      databaseUrl.port = "5433";
+      databaseUrl.port = '5433';
     }
   }
 

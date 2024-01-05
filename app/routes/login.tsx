@@ -2,179 +2,147 @@ import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   MetaFunction,
-} from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
-import { useEffect, useRef } from "react";
+} from '@remix-run/node';
 
-import { verifyLogin } from "~/models/user.server";
-import { createUserSession, getUserId } from "~/session.server";
-import { safeRedirect, validateEmail } from "~/utils";
+import { json, redirect } from '@remix-run/node';
+import {
+  Form,
+  Link,
+  useActionData,
+  useLoaderData,
+  useNavigation,
+} from '@remix-run/react';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
+import {
+  ActionContextProvider,
+  useForm,
+} from '~/components/ActionContextProvider';
+import { RouteErrorBoundary } from '~/components/Boundaries';
+import { FormTextField } from '~/components/FormTextField';
+import { GhostButtonLink } from '~/components/GhostButton';
+import { InlineAlert } from '~/components/InlineAlert';
+import { Logo } from '~/components/Logo';
+import { PrimaryButton } from '~/components/PrimaryButton';
+import { ADMIN, EmailAddressSchema, LENDER } from '~/models/auth.validations';
+import {
+  badRequest,
+  getQueryParams,
+  processBadRequest,
+} from '~/models/core.validations';
+import { getRawFormFields } from '~/models/forms';
+import { AppLinks } from '~/models/links';
+import { verifyLogin } from '~/models/user.server';
+import { createUserSession, getUser } from '~/session.server';
+
+export const meta: MetaFunction = () => [{ title: 'Zim Loans Online - Login' }];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const userId = await getUserId(request);
-  if (userId) return redirect("/");
-  return json({});
+  const currentUser = await getUser(request);
+  if (currentUser) {
+    if (currentUser.kind === ADMIN || currentUser.kind === LENDER) {
+      return redirect(AppLinks.Applications);
+    }
+    return redirect('/');
+  }
+  const { message } = getQueryParams(request.url, ['message']);
+  return json({ message });
 };
 
+const Schema = z.object({
+  emailAddress: EmailAddressSchema,
+  password: z.string().min(1),
+});
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const formData = await request.formData();
-  const email = formData.get("email");
-  const password = formData.get("password");
-  const redirectTo = safeRedirect(formData.get("redirectTo"), "/");
-  const remember = formData.get("remember");
-
-  if (!validateEmail(email)) {
-    return json(
-      { errors: { email: "Email is invalid", password: null } },
-      { status: 400 },
-    );
+  const fields = await getRawFormFields(request);
+  const result = Schema.safeParse(fields);
+  if (!result.success) {
+    return processBadRequest(result.error, fields);
   }
+  const { emailAddress, password } = result.data;
 
-  if (typeof password !== "string" || password.length === 0) {
-    return json(
-      { errors: { email: null, password: "Password is required" } },
-      { status: 400 },
-    );
-  }
-
-  if (password.length < 8) {
-    return json(
-      { errors: { email: null, password: "Password is too short" } },
-      { status: 400 },
-    );
-  }
-
-  const user = await verifyLogin(email, password);
-
+  const user = await verifyLogin(emailAddress, password);
   if (!user) {
-    return json(
-      { errors: { email: "Invalid email or password", password: null } },
-      { status: 400 },
-    );
+    return badRequest({ fields, formError: `Incorrect credentials` });
   }
 
   return createUserSession({
-    redirectTo,
-    remember: remember === "on" ? true : false,
     request,
     userId: user.id,
+    remember: true,
+    redirectTo: AppLinks.Home,
   });
 };
 
-export const meta: MetaFunction = () => [{ title: "Login" }];
-
 export default function LoginPage() {
-  const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/notes";
+  const { message } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
+
+  const navigation = useNavigation();
+  const isProcessing = navigation.formAction === AppLinks.Login;
+  const { getNameProp } = useForm(
+    { data: actionData, state: navigation.state },
+    Schema,
+  );
 
   useEffect(() => {
-    if (actionData?.errors?.email) {
-      emailRef.current?.focus();
-    } else if (actionData?.errors?.password) {
-      passwordRef.current?.focus();
+    if (message) {
+      toast.info(message);
     }
-  }, [actionData]);
+  }, [message]);
 
   return (
-    <div className="flex min-h-full flex-col justify-center">
-      <div className="mx-auto w-full max-w-md px-8">
-        <Form method="post" className="space-y-6">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
+    <div className="flex flex-col justify-center items-center h-full p-2">
+      <Form
+        method="post"
+        className="flex flex-col items-stretch w-[100%] sm:w-[80%] md:w-[60%] lg:w-[30%] gap-6"
+      >
+        <ActionContextProvider {...actionData} isSubmitting={isProcessing}>
+          <div className="flex flex-col justify-center items-center p-4">
+            <Link
+              to={AppLinks.Home}
+              className="flex flex-col justify-center items-center w-2/5"
             >
-              Email address
-            </label>
-            <div className="mt-1">
-              <input
-                ref={emailRef}
-                id="email"
-                required
-                // eslint-disable-next-line jsx-a11y/no-autofocus
-                autoFocus={true}
-                name="email"
-                type="email"
-                autoComplete="email"
-                aria-invalid={actionData?.errors?.email ? true : undefined}
-                aria-describedby="email-error"
-                className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
-              />
-              {actionData?.errors?.email ? (
-                <div className="pt-1 text-red-700" id="email-error">
-                  {actionData.errors.email}
-                </div>
-              ) : null}
+              <Logo />
+            </Link>
+          </div>
+          <div className="flex flex-col items-stretch gap-4 pb-4">
+            <div className="flex flex-col justify-center items-center">
+              <span className="text-xl font-semibold text-stone-600">
+                Log In To Continue
+              </span>
+            </div>
+            <FormTextField
+              {...getNameProp('emailAddress')}
+              type="email"
+              label="Email"
+              placeholder="you@gmail.com"
+            />
+            <FormTextField
+              {...getNameProp('password')}
+              type="password"
+              label="Password"
+            />
+            {actionData?.formError ? (
+              <InlineAlert>{actionData.formError}</InlineAlert>
+            ) : null}
+            <div className="flex flex-col items-stretch gap-4 py-4">
+              <PrimaryButton type="submit" disabled={isProcessing}>
+                {isProcessing ? 'Logging In...' : 'Log In'}
+              </PrimaryButton>
+              <GhostButtonLink to={AppLinks.CreateAccount}>
+                {"Don't Have An Account"}
+              </GhostButtonLink>
             </div>
           </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Password
-            </label>
-            <div className="mt-1">
-              <input
-                id="password"
-                ref={passwordRef}
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                aria-invalid={actionData?.errors?.password ? true : undefined}
-                aria-describedby="password-error"
-                className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
-              />
-              {actionData?.errors?.password ? (
-                <div className="pt-1 text-red-700" id="password-error">
-                  {actionData.errors.password}
-                </div>
-              ) : null}
-            </div>
-          </div>
-
-          <input type="hidden" name="redirectTo" value={redirectTo} />
-          <button
-            type="submit"
-            className="w-full rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:bg-blue-400"
-          >
-            Log in
-          </button>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember"
-                name="remember"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label
-                htmlFor="remember"
-                className="ml-2 block text-sm text-gray-900"
-              >
-                Remember me
-              </label>
-            </div>
-            <div className="text-center text-sm text-gray-500">
-              Don&apos;t have an account?{" "}
-              <Link
-                className="text-blue-500 underline"
-                to={{
-                  pathname: "/join",
-                  search: searchParams.toString(),
-                }}
-              >
-                Sign up
-              </Link>
-            </div>
-          </div>
-        </Form>
-      </div>
+        </ActionContextProvider>
+      </Form>
     </div>
   );
+}
+
+export function ErrorBoundary() {
+  return <RouteErrorBoundary />;
 }

@@ -1,9 +1,20 @@
-import { EmploymentType, PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
+import { faker } from '@faker-js/faker';
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+
+import {
+  APPLICATION_STATES,
+  KYC_DOCS,
+  MARITAL_STATUSES,
+  NATURE_OF_RES_OPTIONS,
+} from '~/models/application.validations';
+import { ADMIN, APPLICANT, LENDER } from '~/models/auth.validations';
 
 const prisma = new PrismaClient();
 
-async function seed () {
+async function seed() {
+  const HASHED_PASSWORD = await bcrypt.hash('jarnbjorn@8901', 10);
+
   await prisma.employmentPreference.deleteMany();
   await prisma.employmentType.deleteMany();
   await prisma.decision.deleteMany();
@@ -13,161 +24,175 @@ async function seed () {
   await prisma.application.deleteMany();
   await prisma.lender.deleteMany();
   await prisma.user.deleteMany();
-  await prisma.user.create({
-    data: {
-      emailAddress: "admin@example.com",
-      hashedPassword: await bcrypt.hash("jarnbjorn@8901", 10),
-      fullName: "Admin Doe",
-      kind: "Admin",
-    }
-  });
-  const lenderUser = await prisma.user.create({
-    data: {
-      emailAddress: "lender@example.com",
-      hashedPassword: await bcrypt.hash("jarnbjorn@8901", 10),
-      fullName: "Lender Doe",
-      kind: "Lender",
-    }
-  });
-  const applicant = await prisma.user.create({
-    data: {
-      emailAddress: "you@example.com",
-      hashedPassword: await bcrypt.hash("jarnbjorn@8901", 10),
-      fullName: "John Doe",
-      kind: "Applicant",
-    }
-  });
-  const lender = await prisma.lender.create({
-    data: {
-      userId: lenderUser.id,
-      logo: '',
-      logoPublicId: "h2bkwgii1e28hltu7f99",
-      logoWidth: 200,
-      logoHeight: 200,
-      minTenure: 1,
-      maxTenure: 5,
-      minAmount: 2000,
-      maxAmount: 10000,
-      monthlyInterest: 5.75,
-      adminFee: 2.50,
-      applicationFee: 1.25,
-      paid: false,
-    },
-  });
-  const application = await prisma.application.create({
-    data: {
-      applicantId: applicant.id,
 
-      state: 'Approved',
-      moreDetail: 'Description Example...',
-
-      bank: 'CBZ',
-      bankBranch: 'Nelson Mandela, Harare',
-      accNumber: '1234567890',
-      accName: 'Peter Moyo',
-
-      loanPurpose: 'Farming Capital',
-      amtRequired: 12500,
-      repaymentPeriod: 3,
-
-      title: 'Mr.',
-      fullName: 'Peter Moyo',
-      DOB: new Date(1995, 4, 13),
-      nationalID: '70-279423-B-30',
-      phoneNumber: '+263739083125',
-      resAddress: '2131 Place, Harare',
-      natureOfRes: 'Rented',
-
-      fullMaidenNames: '',
-      fullNameOfSpouse: 'Jane Doe',
-      maritalStatus: 'Married',
-
-      profession: 'Banker',
-      employer: 'CBZ',
-      employedSince: new Date(2013, 4, 9),
-      grossIncome: 4200,
-      netIncome: 3800,
-
-      firstNokFullName: 'Adam Person',
-      firstNokRelationship: 'Uncle',
-      firstNokEmployer: 'CABS',
-      firstNokResAddress: '4342 Another Place, Harare',
-      firstNokPhoneNumber: '+263772456321',
-
-      secondNokFullName: 'Moses Dube',
-      secondNokRelationship: 'Brother',
-      secondNokEmployer: 'NMB',
-      secondNokResAddress: '2334 Place, Harare',
-      secondNokPhoneNumber: '+263772456321',
-    }
-  });
-  await prisma.priorLoan.create({
-    data: {
-      applicationId: application.id,
-      lender: "Club Plus",
-      expiryDate: new Date(2023, 4, 5),
-      amount: 4000,
-      monthlyRepayment: 250,
-      balance: 750,
-    }
-  });
-  await prisma.kycDoc.createMany({
-    data: [
-      {
-        applicationId: application.id,
-        label: "National-ID/Passport",
-        publicId: "h2bkwgii1e28hltu7f99",
-        width: 3200,
-        height: 2400,
-      },
-      {
-        applicationId: application.id,
-        label: "Proof of Residence",
-        publicId: "h2bkwgii1e28hltu7f99",
-        width: 3200,
-        height: 2400,
-      },
-      {
-        applicationId: application.id,
-        label: "Pay Slip",
-        publicId: "h2bkwgii1e28hltu7f99",
-        width: 3200,
-        height: 2400,
-      },
-    ],
-  });
-  const channel = await prisma.channel.create({
-    data: {
-      applicationId: application.id,
-      lenderId: lender.id,
-    }
-  });
-  await prisma.decision.create({
-    data: {
-      channelId: channel.id,
-      decision: 'Approved',
-      comment: 'Comment example...',
-    }
-  });
   const typesToAdd = [
-    'SSB',
-    'Entrepreneur',
+    'SSB Employees',
+    'Entrepreneurs',
     'HeadHunters',
-    'Inscor Worker'
+    'Inscor Workers',
   ];
-  const employmentTypes: EmploymentType[] = [];
-  await Promise.all(typesToAdd.map(async (employmentType) => {
-    const added = await prisma.employmentType.create({
-      data: { employmentType },
+  const employmentTypeIds = await Promise.all(
+    typesToAdd.map(async (employmentType) => {
+      const { id } = await prisma.employmentType.create({
+        data: { employmentType },
+        select: { id: true },
+      });
+      return id;
+    }),
+  );
+
+  for (let i = 0; i < 5; i++) {
+    await prisma.user.create({
+      data: {
+        emailAddress: faker.internet.email(),
+        hashedPassword: HASHED_PASSWORD,
+        fullName: faker.person.fullName(),
+        kind: ADMIN,
+      },
     });
-    employmentTypes.push(added);
-  }));
-  await prisma.employmentPreference.create({
-    data: {
-      lenderId: lender.id,
-      employmentTypeId: employmentTypes[0].id,
+  }
+  const applicantIds: number[] = [];
+  for (let i = 0; i < 5; i++) {
+    const { id } = await prisma.user.create({
+      data: {
+        emailAddress: faker.internet.email(),
+        hashedPassword: HASHED_PASSWORD,
+        fullName: faker.person.fullName(),
+        kind: APPLICANT,
+      },
+      select: { id: true },
+    });
+    applicantIds.push(id);
+  }
+
+  const lenderIds: number[] = [];
+  for (const employmentTypeId of employmentTypeIds) {
+    for (let i = 0; i < 5; i++) {
+      const { id } = await prisma.lender.create({
+        data: {
+          user: {
+            create: {
+              emailAddress: faker.internet.email(),
+              hashedPassword: HASHED_PASSWORD,
+              fullName: faker.company.name(),
+              kind: LENDER,
+            },
+          },
+          employmentPreferences: { create: { employmentTypeId } },
+          logo: '',
+          logoPublicId: 'h2bkwgii1e28hltu7f99',
+          logoWidth: 200,
+          logoHeight: 200,
+          minTenure: faker.number.int(3),
+          maxTenure: faker.number.int(12),
+          minAmount: faker.number.float(200),
+          maxAmount: faker.number.float(10_000),
+          monthlyInterest: faker.number.float({ min: 1, max: 50 }),
+          adminFee: faker.number.float({ min: 1, max: 20 }),
+          applicationFee: faker.number.float({ min: 1, max: 20 }),
+          paid: false,
+        },
+      });
+      lenderIds.push(id);
     }
-  });
+  }
+
+  function generatePhone() {
+    return faker.helpers.fromRegExp('+26377#{7}');
+  }
+
+  for (const state of APPLICATION_STATES) {
+    for (const natureOfRes of NATURE_OF_RES_OPTIONS) {
+      for (const maritalStatus of MARITAL_STATUSES) {
+        for (const applicantId of applicantIds) {
+          for (const lenderId of lenderIds) {
+            await prisma.application.create({
+              data: {
+                applicantId,
+                state,
+                moreDetail: faker.lorem.paragraph(2),
+
+                bank: faker.company.name(),
+                bankBranch: faker.location.streetAddress(),
+                accNumber: faker.finance.accountNumber(),
+                accName: faker.finance.accountName(),
+
+                loanPurpose: faker.word.noun(20),
+                amtRequired: faker.finance.amount({ min: 100, max: 100_000 }),
+                repaymentPeriod: faker.number.int({ min: 3, max: 12 }),
+
+                title: faker.person.prefix(),
+                fullName: faker.person.fullName(),
+                DOB: faker.date.birthdate({ min: 18, max: 70, mode: 'age' }),
+                nationalID: faker.helpers.fromRegExp('#{2}-#{6}-A-Z]#{2}'),
+                phoneNumber: generatePhone(),
+                resAddress: faker.location.streetAddress(),
+                natureOfRes,
+
+                fullMaidenNames: '',
+                fullNameOfSpouse: faker.person.fullName(),
+                maritalStatus,
+
+                profession: faker.person.jobTitle(),
+                employer: faker.company.name(),
+                employedSince: faker.date.recent(),
+                grossIncome: faker.finance.amount({ min: 4_000, max: 10_000 }),
+                netIncome: faker.finance.amount({ max: 4_000 }),
+
+                firstNokFullName: faker.person.fullName(),
+                firstNokRelationship: 'Relative',
+                firstNokEmployer: faker.company.name(),
+                firstNokResAddress: faker.location.streetAddress(),
+                firstNokPhoneNumber: generatePhone(),
+
+                secondNokFullName: faker.person.fullName(),
+                secondNokRelationship: 'Relative',
+                secondNokEmployer: faker.company.name(),
+                secondNokResAddress: faker.location.streetAddress(),
+                secondNokPhoneNumber: generatePhone(),
+
+                priorLoans: {
+                  createMany: {
+                    data: [...Array(3).keys()].map((_) => ({
+                      lender: faker.company.name(),
+                      expiryDate: faker.date.recent(),
+                      amount: faker.finance.amount({ min: 1_000 }),
+                      monthlyRepayment: faker.finance.amount({ max: 500 }),
+                      balance: faker.finance.amount({ min: 500, max: 1_000 }),
+                    })),
+                  },
+                },
+
+                kycDocs: {
+                  createMany: {
+                    data: KYC_DOCS.map((label) => ({
+                      label,
+                      publicId: 'h2bkwgii1e28hltu7f99',
+                      width: 3200,
+                      height: 2400,
+                    })),
+                  },
+                },
+
+                channels: {
+                  create: {
+                    lenderId,
+                    decisions: {
+                      create: {
+                        decision: state,
+                        comment: faker.lorem.paragraph(2),
+                      },
+                    },
+                  },
+                },
+              },
+            });
+          }
+        }
+      }
+    }
+  }
+
   console.log(`Database has been seeded. 🌱`);
 }
 

@@ -1,5 +1,5 @@
-const { rest } = require("msw");
-const { setupServer } = require("msw/node");
+const { rest } = require('msw');
+const { setupServer } = require('msw/node');
 
 // put one-off handlers that don't really need an entire file to themselves here
 const miscHandlers = [
@@ -10,8 +10,8 @@ const miscHandlers = [
 
 const server = setupServer(...miscHandlers);
 
-server.listen({ onUnhandledRequest: "bypass" });
-console.info("🔶 Mock server running");
+server.listen({ onUnhandledRequest: 'bypass' });
+console.info('🔶 Mock server running');
 
-process.once("SIGINT", () => server.close());
-process.once("SIGTERM", () => server.close());
+process.once('SIGINT', () => server.close());
+process.once('SIGTERM', () => server.close());

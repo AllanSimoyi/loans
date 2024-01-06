@@ -11,15 +11,10 @@ export function Catalog(props: Props) {
   return (
     <>
       {!!lenders.length && (
-        <div className="flex flex-col items-stretch gap-4">
-          <span className="text-stone-600 font-semibold">
-            Matching Offers :
-          </span>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {lenders.map((lender) => (
-              <LenderGridItem key={lender.id} lender={lender} />
-            ))}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {lenders.map((lender) => (
+            <LenderGridItem key={lender.id} lender={lender} />
+          ))}
         </div>
       )}
       {!lenders.length && (

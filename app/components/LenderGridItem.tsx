@@ -8,6 +8,8 @@ type LenderProps = {
   id: number;
   name: string;
   logo: string;
+  minAmount: number;
+  maxAmount: number;
   minTenure: number;
   maxTenure: number;
   employmentPreferences: string[];
@@ -22,6 +24,15 @@ export interface LenderGridItemProps {
 
 export function LenderGridItem(props: LenderGridItemProps) {
   const { lender } = props;
+
+  const details: [string, string][] = [
+    ['Min Amount Offered', `ZWL ${lender.minAmount}`],
+    ['Max Amount Offered', `ZWL ${lender.maxAmount}`],
+    ['Monthly Interest', `${lender.monthlyInterest}%`],
+    ['Amin Fee', `${lender.adminFee}%`],
+    ['Application Fee', `${lender.applicationFee.toLocaleString()}%`],
+  ];
+
   return (
     <Card className="h-full bg-white rounded-lg">
       <div className="flex flex-row items-center gap-2 p-4 border-b border-dashed border-stone-200">
@@ -53,12 +64,14 @@ export function LenderGridItem(props: LenderGridItemProps) {
                 {pref}
               </span>
             ))}
-            {/* Giving loans to {lender.employmentPreferences.join(', ')} */}
           </span>
         )}
         <div className="grow" />
         <div className="flex flex-col items-stretch justify-start py-4 text-sm gap-2">
-          <JoinedChip
+          {details.map(([label, value]) => (
+            <JoinedChip key={label} label={label} value={value} />
+          ))}
+          {/* <JoinedChip
             label="Monthly Interest"
             value={`${lender.monthlyInterest}%`}
           />
@@ -66,7 +79,7 @@ export function LenderGridItem(props: LenderGridItemProps) {
           <JoinedChip
             label="Application Fee"
             value={`${lender.applicationFee.toLocaleString()}%`}
-          />
+          /> */}
         </div>
       </div>
       <div className="flex flex-col items-stretch p-4">

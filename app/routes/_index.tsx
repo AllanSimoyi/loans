@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 
 import { Form, json, useLoaderData, useNavigation } from '@remix-run/react';
+import { X } from 'tabler-icons-react';
 import { z } from 'zod';
 
 import { ActionContextProvider } from '~/components/ActionContextProvider';
@@ -77,6 +78,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
           .map((lender) => ({
             ...lender,
             name: lender.user.fullName,
+            minAmount: Number(lender.minAmount),
+            maxAmount: Number(lender.maxAmount),
             monthlyInterest: Number(lender.monthlyInterest),
             adminFee: Number(lender.adminFee),
             applicationFee: Number(lender.applicationFee),
@@ -96,6 +99,19 @@ export default function Index() {
 
   const nav = useNavigation();
   const isProcessing = nav.state !== 'idle';
+
+  const tags = [
+    fields?.employmentTypeId
+      ? employmentTypes.find((el) => el.id === fields?.employmentTypeId)
+          ?.employmentType
+      : undefined,
+    fields?.requiredAmount
+      ? `ZWL ${fields?.requiredAmount.toLocaleString()}`
+      : undefined,
+    fields?.repaymentPeriod
+      ? `To be repaid in ${fields?.repaymentPeriod} months`
+      : undefined,
+  ].filter(Boolean);
 
   return (
     <div className="flex flex-col items-stretch">
@@ -182,6 +198,21 @@ export default function Index() {
       </div>
       <div className="flex flex-col items-stretch px-4 lg:px-0 py-16 border-b border-b-gray-400">
         <CenteredView>
+          <div className="flex flex-row items-center gap-6 pb-8">
+            <span className="text-2xl font-normal">
+              {lenders.length} available{' '}
+              {lenders.length === 1 ? 'loan' : 'loans'}
+            </span>
+            {tags.map((tag) => (
+              <div
+                key={tag}
+                className="flex flex-row items-center gap-4 bg-black/10 rounded-full px-4 py-1"
+              >
+                <span className="font-normal text-sm">{tag}</span>
+                <X className="text-red-600" />
+              </div>
+            ))}
+          </div>
           <Catalog lenders={lenders} />
         </CenteredView>
       </div>

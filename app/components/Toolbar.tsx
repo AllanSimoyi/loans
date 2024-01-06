@@ -1,4 +1,4 @@
-import { Link } from '@remix-run/react';
+import { Link, useNavigation } from '@remix-run/react';
 
 import { AppLinks } from '~/models/links';
 
@@ -6,6 +6,7 @@ import { CenteredView } from './CenteredView';
 import { DropDownMenu } from './DropDownMenu';
 import { GhostButtonLink } from './GhostButton';
 import { Logo } from './Logo';
+import { ProgressBar } from './ProgressBar';
 import { UnderLineOnHover } from './UnderLineOnHover';
 
 interface NavItem {
@@ -21,12 +22,22 @@ const navItems: NavItem[] = [
 
 interface Props {
   currentUser: { fullName: string; kind: string } | undefined;
+  showProgressBar?: boolean;
 }
 
 export function Toolbar(props: Props) {
-  const { currentUser } = props;
+  const { showProgressBar: initShowProgressBar, currentUser } = props;
+  const nav = useNavigation();
+
+  const showProgressBar = initShowProgressBar || nav.state !== 'idle';
+
   return (
     <div className="flex flex-col items-stretch bg-white shadow-md">
+      {showProgressBar && (
+        <div className="flex flex-col items-stretch py-0">
+          <ProgressBar />
+        </div>
+      )}
       <CenteredView>
         <div className="flex flex-row p-4 justify-center items-center">
           <div className="flex flex-row items-end gap-4">

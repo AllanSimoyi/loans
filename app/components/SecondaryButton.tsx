@@ -11,7 +11,7 @@ interface GetClassNameProps {
 function getClassName(props: GetClassNameProps) {
   const { className: inputClassName, disabled } = props;
   const className = twMerge(
-    'rounded-md transition-all duration-300 text-center p-3',
+    'rounded-md transition-all duration-300 text-center p-3 py-2',
     'bg-stone-200 text-stone-600 hover:bg-stone-300 focus:bg-stone-200 focus:outline-green-100',
     disabled &&
       'text-stone-400/40 cursor-not-allowed bg-stone-200/50 hover:bg-stone-200/50',

@@ -59,7 +59,11 @@ export async function requireUser(request: Request) {
   const userId = await requireUserId(request);
 
   const user = await getUserById(userId);
-  if (user) return user;
+  if (user) {
+    return user;
+  }
+
+  console.log('No user found');
 
   throw await logout(request);
 }

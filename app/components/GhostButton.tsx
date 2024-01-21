@@ -14,8 +14,8 @@ function getClassName(props: GetClassNameProps) {
   const { disabled, className: inputClassName } = props;
 
   return twMerge(
-    'rounded-lg text-center font-semibold transition-all duration-300 md:bg-transparent py-1 text-indigo-600',
-    'focus:outline-stone-100 hover:bg-indigo-50',
+    'rounded-lg text-center font-normal transition-all duration-300 md:bg-transparent py-1 text-blue-600',
+    'focus:outline-stone-100 hover:bg-blue-50',
     disabled && 'text-stone-200',
     inputClassName,
   );

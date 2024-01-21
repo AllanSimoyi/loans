@@ -26,7 +26,7 @@ import { GhostButtonLink } from '~/components/GhostButton';
 import { InlineAlert } from '~/components/InlineAlert';
 import { Logo } from '~/components/Logo';
 import { PrimaryButton } from '~/components/PrimaryButton';
-import { ADMIN, EmailAddressSchema, LENDER } from '~/models/auth.validations';
+import { EmailAddressSchema, UserType } from '~/models/auth.validations';
 import {
   badRequest,
   getQueryParams,
@@ -37,15 +37,18 @@ import { AppLinks } from '~/models/links';
 import { verifyLogin } from '~/models/user.server';
 import { createUserSession, getUser } from '~/session.server';
 
-export const meta: MetaFunction = () => [{ title: 'Zim Loans Online - Login' }];
+export const meta: MetaFunction = () => [{ title: 'Quick Loans - Login' }];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const currentUser = await getUser(request);
   if (currentUser) {
-    if (currentUser.kind === ADMIN || currentUser.kind === LENDER) {
+    if (
+      currentUser.kind === UserType.Admin ||
+      currentUser.kind === UserType.Lender
+    ) {
       return redirect(AppLinks.Applications);
     }
-    return redirect('/');
+    return redirect(AppLinks.Home);
   }
   const { message } = getQueryParams(request.url, ['message']);
   return json({ message });
@@ -94,22 +97,22 @@ export default function LoginPage() {
   }, [message]);
 
   return (
-    <div className="flex flex-col justify-center items-center h-full p-2">
+    <div className="flex h-full flex-col items-center justify-center p-2">
       <Form
         method="post"
-        className="flex flex-col items-stretch w-[100%] sm:w-[80%] md:w-[60%] lg:w-[30%] gap-6"
+        className="flex w-[100%] flex-col items-stretch gap-6 sm:w-[80%] md:w-[60%] lg:w-[30%]"
       >
         <ActionContextProvider {...actionData} isSubmitting={isProcessing}>
-          <div className="flex flex-col justify-center items-center p-4">
+          <div className="flex flex-col items-center justify-center p-4">
             <Link
               to={AppLinks.Home}
-              className="flex flex-col justify-center items-center w-2/5"
+              className="flex w-2/5 flex-col items-center justify-center"
             >
               <Logo />
             </Link>
           </div>
           <div className="flex flex-col items-stretch gap-4 pb-4">
-            <div className="flex flex-col justify-center items-center">
+            <div className="flex flex-col items-center justify-center">
               <span className="text-xl font-semibold text-stone-600">
                 Log In To Continue
               </span>

@@ -1,3 +1,4 @@
+import { twMerge } from 'tailwind-merge';
 import { z } from 'zod';
 
 import {
@@ -6,17 +7,25 @@ import {
   PasswordSchema,
 } from '~/models/auth.validations';
 
-import { DateSchema, PositiveIntSchema } from './core.validations';
+import {
+  DateSchema,
+  PositiveDecimalSchema,
+  PositiveIntSchema,
+} from './core.validations';
 
 export enum KycDoc {
   NationalID = 'National-ID/Passport',
   ProofOfResidence = 'Proof Of Residence',
   PaySlip = 'Pay Slip',
+  LetterFromEmployer = 'Letter From Employer',
+  BankStatement = 'Bank Statement',
 }
 export const KYC_DOCS = [
   KycDoc.NationalID,
   KycDoc.ProofOfResidence,
   KycDoc.PaySlip,
+  KycDoc.LetterFromEmployer,
+  KycDoc.BankStatement,
 ] as const;
 
 export enum MaritalStatus {
@@ -54,23 +63,24 @@ export const APPLICATION_STATES = [
   ApplicationState.Declined,
 ] as const;
 
-export const PriorLoanSchema = z.object({
-  lender: z.string().min(1).max(100),
-  expiryDate: DateSchema,
-  amount: PositiveIntSchema,
-  monthlyRepayment: PositiveIntSchema,
-  balance: PositiveIntSchema,
-});
 export const KycDocSchema = z.object({
   label: z.string().min(1).max(100),
   publicId: z.string().min(1).max(500),
 });
 export const KycDocsSchema = z.array(KycDocSchema);
 
+export const PriorLoanSchema = z.object({
+  lender: z.string().min(1).max(100),
+  expiryDate: DateSchema,
+  amount: PositiveDecimalSchema,
+  monthlyRepayment: PositiveDecimalSchema,
+  balance: PositiveDecimalSchema,
+});
+
 export const CreateApplicationSchema = z.object({
-  'signup.emailAddress': EmailAddressSchema.optional(),
-  'signup.password': PasswordSchema.optional(),
-  'signup.passwordConfirmation': PasswordSchema.optional(),
+  emailAddress: EmailAddressSchema.optional(),
+  password: PasswordSchema.optional(),
+  passwordConfirmation: PasswordSchema.optional(),
 
   selectedLenderId: PositiveIntSchema,
   moreDetail: z.string().max(800),
@@ -81,7 +91,7 @@ export const CreateApplicationSchema = z.object({
   accName: z.string().min(1).max(200),
 
   loanPurpose: z.string().min(1).max(300),
-  amtRequired: PositiveIntSchema,
+  amtRequired: PositiveDecimalSchema,
   repaymentPeriod: PositiveIntSchema,
 
   title: z.string().min(1).max(10),
@@ -99,8 +109,8 @@ export const CreateApplicationSchema = z.object({
   profession: z.string().min(1).max(100),
   employer: z.string().min(1).max(100),
   employedSince: DateSchema,
-  grossIncome: PositiveIntSchema,
-  netIncome: PositiveIntSchema,
+  grossIncome: PositiveDecimalSchema,
+  netIncome: PositiveDecimalSchema,
 
   firstNokFullName: z.string().min(1).max(100),
   firstNokRelationship: z.string().min(1).max(100),
@@ -115,20 +125,148 @@ export const CreateApplicationSchema = z.object({
   secondNokPhoneNumber: z.string().min(1).max(20),
 
   kycDocs: z.preprocess((arg) => {
-    if (typeof arg === 'string') {
-      return JSON.parse(arg);
+    try {
+      if (typeof arg === 'string') {
+        return JSON.parse(arg);
+      }
+    } catch (error) {
+      return undefined;
     }
   }, KycDocsSchema),
-  'priorLoan.lender': z.string().min(1).max(100).optional(),
-  'priorLoan.expiryDate': DateSchema.optional(),
-  'priorLoan.amount': PositiveIntSchema.optional(),
-  'priorLoan.monthlyRepayment': PositiveIntSchema.optional(),
-  'priorLoan.balance': PositiveIntSchema.optional(),
+  priorLoanLender: z.string().min(1).max(100).or(z.literal('')).optional(),
+  priorLoanExpiryDate: DateSchema.or(z.literal('')).optional(),
+  priorLoanAmount: PositiveDecimalSchema.or(z.literal('')).optional(),
+  priorLoanMonthlyRepayment: PositiveDecimalSchema.or(z.literal('')).optional(),
+  priorLoanBalance: PositiveDecimalSchema.or(z.literal('')).optional(),
 });
-
 export const EditApplicationSchema = CreateApplicationSchema.extend({
   applicationId: PositiveIntSchema,
 });
+
+export const UserDetailsSchema = z
+  .object({
+    emailAddress: EmailAddressSchema,
+    password: PasswordSchema,
+    passwordConfirmation: PasswordSchema,
+  })
+  .refine((data) => data.password === data.passwordConfirmation, {
+    message: "Passwords don't match",
+    path: ['passwordConfirmation'],
+  });
+
+export const TransformedCreateApplicationSchema =
+  CreateApplicationSchema.transform((data, ctx) => {
+    const {
+      emailAddress,
+      password,
+      passwordConfirmation,
+      priorLoanLender,
+      priorLoanExpiryDate,
+      priorLoanAmount,
+      priorLoanMonthlyRepayment,
+      priorLoanBalance,
+      ...restOfData
+    } = data;
+    const signUpDetails = (() => {
+      if (!emailAddress) {
+        return undefined;
+      }
+      const result = UserDetailsSchema.safeParse(data);
+      if (!result.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: result.error.issues
+            .map((issue) => `${issue.path}: ${issue.message}`)
+            .join(', '),
+          path: ['emailAddress'],
+        });
+        return undefined;
+      }
+      return result.data;
+    })();
+    const priorLoan = (() => {
+      if (!data.priorLoanLender) {
+        return undefined;
+      }
+      const result = PriorLoanSchema.safeParse({
+        lender: priorLoanLender,
+        expiryDate: priorLoanExpiryDate,
+        amount: priorLoanAmount,
+        monthlyRepayment: priorLoanMonthlyRepayment,
+        balance: priorLoanBalance,
+      });
+      if (!result.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: result.error.issues
+            .map((issue) => `${issue.path}: ${issue.message}`)
+            .join(', '),
+          path: ['priorLoanLender'],
+        });
+        return undefined;
+      }
+      return result.data;
+    })();
+
+    return { ...restOfData, signUpDetails, priorLoan };
+  });
+export const TransformedEditApplicationSchema = EditApplicationSchema.transform(
+  (data, ctx) => {
+    const {
+      emailAddress,
+      password,
+      passwordConfirmation,
+      priorLoanLender,
+      priorLoanExpiryDate,
+      priorLoanAmount,
+      priorLoanMonthlyRepayment,
+      priorLoanBalance,
+      ...restOfData
+    } = data;
+    const signUpDetails = (() => {
+      if (!emailAddress) {
+        return undefined;
+      }
+      const result = UserDetailsSchema.safeParse(data);
+      if (!result.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: result.error.issues
+            .map((issue) => `${issue.path}: ${issue.message}`)
+            .join(', '),
+          path: ['emailAddress'],
+        });
+        return undefined;
+      }
+      return result.data;
+    })();
+    const priorLoan = (() => {
+      if (!data.priorLoanLender) {
+        return undefined;
+      }
+      const result = PriorLoanSchema.safeParse({
+        lender: priorLoanLender,
+        expiryDate: priorLoanExpiryDate,
+        amount: priorLoanAmount,
+        monthlyRepayment: priorLoanMonthlyRepayment,
+        balance: priorLoanBalance,
+      });
+      if (!result.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: result.error.issues
+            .map((issue) => `${issue.path}: ${issue.message}`)
+            .join(', '),
+          path: ['priorLoanLender'],
+        });
+        return undefined;
+      }
+      return result.data;
+    })();
+
+    return { ...restOfData, signUpDetails, priorLoan };
+  },
+);
 
 export const ApplicationFormSchema = z.object({
   applicationId: PositiveIntSchema.optional(),
@@ -146,7 +284,7 @@ export const ApplicationFormSchema = z.object({
   accName: z.string().min(1).max(200),
 
   loanPurpose: z.string().min(1).max(300),
-  amtRequired: PositiveIntSchema,
+  amtRequired: PositiveDecimalSchema,
   repaymentPeriod: PositiveIntSchema,
 
   title: z.string().min(1).max(10),
@@ -164,8 +302,8 @@ export const ApplicationFormSchema = z.object({
   profession: z.string().min(1).max(100),
   employer: z.string().min(1).max(100),
   employedSince: DateSchema,
-  grossIncome: PositiveIntSchema,
-  netIncome: PositiveIntSchema,
+  grossIncome: PositiveDecimalSchema,
+  netIncome: PositiveDecimalSchema,
 
   firstNokFullName: z.string().min(1).max(100),
   firstNokRelationship: z.string().min(1).max(100),
@@ -191,4 +329,24 @@ export type Apply = z.infer<typeof ApplicationFormSchema>;
 
 function transformByJSONParse<ResultDataType>(input: string) {
   return JSON.parse(input) as ResultDataType;
+}
+
+export function getApplicationDecision(
+  decisions: { decision: string; createdAt: Date }[],
+) {
+  if (!decisions.length) {
+    return ApplicationState.Pending;
+  }
+  const sortedDecisions = decisions.sort(
+    (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+  );
+  return sortedDecisions[0].decision;
+}
+
+export function getDecisionColor(decision: string) {
+  return twMerge(
+    decision === ApplicationState.Pending && 'text-stone-600/60',
+    decision === ApplicationState.Approved && 'text-green-600',
+    decision === ApplicationState.Declined && 'text-red-600',
+  );
 }

@@ -2,6 +2,9 @@ import type { User } from '~/models/user.server';
 
 import { useMatches } from '@remix-run/react';
 import { useMemo } from 'react';
+import { z } from 'zod';
+
+import { UserType } from './models/auth.validations';
 
 const DEFAULT_REDIRECT = '/';
 
@@ -48,17 +51,23 @@ function isUser(user: unknown): user is User {
   return (
     user != null &&
     typeof user === 'object' &&
-    'email' in user &&
-    typeof user.email === 'string'
+    'emailAddress' in user &&
+    typeof user.emailAddress === 'string'
   );
 }
 
-export function useOptionalUser(): User | undefined {
+export function useOptionalUser() {
   const data = useMatchesData('root');
   if (!data || !isUser(data.user)) {
     return undefined;
   }
-  return data.user;
+  const result = z.nativeEnum(UserType).safeParse(data.user.kind);
+  if (!result.success) {
+    throw new Error(
+      `Invalid user type detected for user with id' ${data.user.id} and kind ${data.user.kind}`,
+    );
+  }
+  return { ...data.user, kind: result.data };
 }
 
 export function useUser(): User {

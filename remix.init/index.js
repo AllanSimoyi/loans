@@ -119,7 +119,7 @@ const main = async ({ packageManager, rootDirectory }) => {
     'delete-user.ts',
   );
 
-  const REPLACER = 'indigos-stack-template';
+  const REPLACER = 'blues-stack-template';
 
   const DIR_NAME = path.basename(rootDirectory);
   const SUFFIX = getRandomString(2);

@@ -15,7 +15,7 @@ import {
 } from 'tabler-icons-react';
 import { twMerge } from 'tailwind-merge';
 
-import { ADMIN, LENDER } from '~/models/auth.validations';
+import { UserType } from '~/models/auth.validations';
 import { AppLinks } from '~/models/links';
 
 import { ToolbarMenuItem } from './ToolbarMenuItem';
@@ -52,10 +52,10 @@ export function DropDownMenu(props: Props) {
     if (!isLoggedIn) {
       return IS_NOT_LOGGED_IN;
     }
-    if (kind === ADMIN) {
+    if (kind === UserType.Admin) {
       return ADMIN_LINKS;
     }
-    if (kind === LENDER) {
+    if (kind === UserType.Lender) {
       return LENDER_LINKS;
     }
     return APPLICANT_LINKS;
@@ -99,7 +99,7 @@ export function DropDownMenu(props: Props) {
             <DotsVertical
               data-testid="menu"
               size={20}
-              className="text-indigo-600"
+              className="text-blue-600"
             />
           </Menu.Button>
         </div>
@@ -112,7 +112,7 @@ export function DropDownMenu(props: Props) {
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute right-0 z-50 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <Menu.Items className="absolute right-0 z-50 mt-2 w-56 origin-top-right divide-y divide-stone-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="px-1 py-1">
               {children.map((child, index) => (
                 <Menu.Item key={index}>

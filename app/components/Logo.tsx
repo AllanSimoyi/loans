@@ -13,7 +13,7 @@ export function Logo(props: Props) {
   return (
     <img
       src={small ? smallLogo : logo}
-      alt="Zim Loans Online"
+      alt="Quick Loans"
       className={twMerge('object-contain', className)}
       {...restOfProps}
     />

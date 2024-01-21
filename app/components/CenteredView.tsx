@@ -9,9 +9,8 @@ interface Props extends ComponentProps<'div'> {
 }
 
 export function CenteredView(props: Props) {
-  const { children, className, ...restOfProps } = props;
-  const { className: innerClassName, ...restOfInnerProps } =
-    props.innerProps || {};
+  const { children, className, innerProps, ...restOfProps } = props;
+  const { className: innerClassName, ...restOfInnerProps } = innerProps || {};
   return (
     <div
       className={twMerge(
@@ -23,7 +22,7 @@ export function CenteredView(props: Props) {
       <div
         className={twMerge(
           'flex flex-col items-stretch',
-          'w-full md:w-[80%] lg:w-[90%]',
+          'w-full md:w-[80%] print:md:w-full lg:w-[90%] print:lg:w-full',
           innerClassName,
         )}
         {...restOfInnerProps}

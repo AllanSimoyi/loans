@@ -1,15 +1,14 @@
-import type {
-  CreateAccountSchema,
-  CreateAdminSchema,
-} from './auth.validations';
 import type { User } from '@prisma/client';
 import type { z } from 'zod';
 
-import bcrypt from 'bcryptjs';
-
 import { prisma } from '~/db.server';
 
-import { ADMIN, APPLICANT, LENDER } from './auth.validations';
+import {
+  UserType,
+  type CreateAccountSchema,
+  type CreateAdminSchema,
+} from './auth.validations';
+import { checkIfPasswordValid, createPasswordHash } from './hashing.server';
 
 export type { User } from '@prisma/client';
 
@@ -30,7 +29,7 @@ export async function createUser(props: CreateUserProps) {
   return prisma.user.create({
     data: {
       emailAddress: emailAddress.toLowerCase().trim(),
-      hashedPassword: await bcrypt.hash(password.trim(), 10),
+      hashedPassword: await createPasswordHash(password.trim()),
       fullName,
       kind,
     },
@@ -46,7 +45,7 @@ export async function createLenderUser(
   if (duplicates.length) {
     throw new Error('Email address already used');
   }
-  const createdLender = await createUser({ ...input, kind: LENDER });
+  const createdLender = await createUser({ ...input, kind: UserType.Lender });
   const { hashedPassword, ...rest } = createdLender;
   (() => hashedPassword)(); // appease linter
   return rest;
@@ -61,7 +60,7 @@ export async function createAdminUser(
   if (duplicates.length) {
     throw new Error('Email address already used');
   }
-  const createdLender = await createUser({ ...input, kind: ADMIN });
+  const createdLender = await createUser({ ...input, kind: UserType.Admin });
   const { hashedPassword, ...rest } = createdLender;
   (() => hashedPassword)(); // appease linter
   return rest;
@@ -76,7 +75,10 @@ export async function createApplicant(
   if (duplicates.length) {
     throw new Error('Email address already used');
   }
-  const createdApplicant = await createUser({ ...input, kind: APPLICANT });
+  const createdApplicant = await createUser({
+    ...input,
+    kind: UserType.Applicant,
+  });
   const { hashedPassword, ...rest } = createdApplicant;
   (() => hashedPassword)(); // appease linter
   return rest;
@@ -91,12 +93,12 @@ export async function verifyLogin(
   password: string,
 ) {
   const userWithPassword = await prisma.user.findUnique({
-    where: { emailAddress },
+    where: { emailAddress: emailAddress.toLowerCase().trim() },
   });
   if (!userWithPassword || !userWithPassword.hashedPassword) {
     return null;
   }
-  const isValid = await bcrypt.compare(
+  const isValid = await checkIfPasswordValid(
     password,
     userWithPassword.hashedPassword,
   );

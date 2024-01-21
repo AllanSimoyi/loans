@@ -11,7 +11,7 @@ export function ToolbarMenuItem(props: Props) {
   const { children, className: inputClassName, active, ...restOfProps } = props;
 
   const className = twMerge(
-    'group text-base font-semibold flex w-full items-center rounded p-2 text-indigo-600 transition-all duration-300',
+    'group text-base font-light flex w-full items-center rounded p-2 text-blue-600 transition-all duration-300',
     active && 'bg-stone-200',
     inputClassName,
   );

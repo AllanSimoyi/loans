@@ -22,7 +22,10 @@ export function FormTextField(props: Props) {
     <div className="flex flex-col items-stretch justify-center gap-1">
       {label ? (
         <span
-          className={twMerge('font-light text-stone-600', labelClassName)}
+          className={twMerge(
+            'text-sm font-light text-stone-600',
+            labelClassName,
+          )}
           {...restOfLabelProps}
         >
           {label}
@@ -38,7 +41,7 @@ export function FormTextField(props: Props) {
         aria-describedby={`${name}-error`}
         className={twMerge(
           'transition-all duration-300',
-          'rounded-md bg-stone-200/70 p-2 font-light outline-none focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400',
+          'rounded-md bg-stone-200/50 p-2 font-light outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400',
           error?.length && 'border-2 border-red-600',
           className,
         )}

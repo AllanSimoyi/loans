@@ -79,7 +79,7 @@ export function ComposeRecordIdSchema(
   identifier: string,
   optional?: 'optional',
 ) {
-  const Schema = z.string({
+  const Schema = z.coerce.number({
     invalid_type_error: `Enter a valid ${identifier}`,
     required_error: `Enter a ${identifier}`,
   });
@@ -107,8 +107,14 @@ export function getValidatedId(rawId: unknown) {
 export function processBadRequest(
   zodError: z.ZodError<unknown>,
   fields: ActionData['fields'],
+  dontLog?: 'dontLog',
 ) {
   const { formErrors, fieldErrors } = zodError.flatten();
+  if (!dontLog) {
+    console.log('fields', fields);
+    console.log('fieldErrors', fieldErrors);
+    console.log('formErrors', formErrors);
+  }
   return badRequest({
     fields,
     fieldErrors,
@@ -134,44 +140,6 @@ export const TitleSchema = z
   })
   .min(1, 'Please enter the title first')
   .max(100, 'Please use less than 200 characters for the title');
-
-const FormErrorSchema = z.object({
-  formError: z.string().min(1),
-});
-export function hasFormError(
-  data: unknown,
-): data is z.infer<typeof FormErrorSchema> {
-  return FormErrorSchema.safeParse(data).success;
-}
-
-const FieldErrorsSchema = z.object({
-  fieldErrors: z.record(z.string().array().optional()),
-});
-export function hasFieldErrors(
-  data: unknown,
-): data is z.infer<typeof FieldErrorsSchema> {
-  return FieldErrorsSchema.safeParse(data).success;
-}
-
-export function getFieldErrors(data: unknown) {
-  if (!hasFieldErrors(data)) {
-    return undefined;
-  }
-  const allFalsy = Object.keys(data.fieldErrors)
-    .map((key) => data.fieldErrors[key])
-    .filter((error) => !error || !error.length);
-  if (allFalsy) {
-    return undefined;
-  }
-  return data.fieldErrors;
-}
-
-const FieldsSchema = z.object({
-  fields: z.record(z.string()),
-});
-export function hasFields(data: unknown): data is z.infer<typeof FieldsSchema> {
-  return FieldsSchema.safeParse(data).success;
-}
 
 const WithErrMsgSchema = z.object({
   errorMessage: z.string(),
@@ -214,4 +182,12 @@ export const FormActionSchema = z.object({
 
 export function getIsOnlyDeleteMethod(formData: FormData) {
   return formData.get(_METHOD) === _METHOD_DELETE;
+}
+
+export function formatAmount(amount: number, fractionDigits?: number) {
+  const refinedAmount = Number(amount.toFixed(1));
+  return refinedAmount.toLocaleString(undefined, {
+    minimumFractionDigits: fractionDigits !== undefined ? fractionDigits : 2,
+    maximumFractionDigits: fractionDigits !== undefined ? fractionDigits : 2,
+  });
 }

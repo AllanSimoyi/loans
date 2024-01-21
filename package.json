@@ -25,7 +25,11 @@
     "validate": "run-p \"test -- --run\" lint typecheck test:e2e:run",
     "prepare": "husky install"
   },
-  "prettier": {},
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-tailwindcss"
+    ]
+  },
   "eslintIgnore": [
     "/node_modules",
     "/build",
@@ -47,6 +51,7 @@
     "chokidar": "^3.5.3",
     "compression": "^1.7.4",
     "cross-env": "^7.0.3",
+    "dayjs": "^1.11.10",
     "eslint-plugin-prettier": "^5.1.2",
     "express": "^4.18.2",
     "isbot": "^3.7.0",

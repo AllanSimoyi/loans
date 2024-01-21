@@ -8,7 +8,7 @@ import {
   MARITAL_STATUSES,
   NATURE_OF_RES_OPTIONS,
 } from '~/models/application.validations';
-import { ADMIN, APPLICANT, LENDER } from '~/models/auth.validations';
+import { UserType } from '~/models/auth.validations';
 
 const prisma = new PrismaClient();
 
@@ -44,10 +44,10 @@ async function seed() {
   for (let i = 0; i < 5; i++) {
     await prisma.user.create({
       data: {
-        emailAddress: faker.internet.email(),
+        emailAddress: faker.internet.email().toLowerCase().trim(),
         hashedPassword: HASHED_PASSWORD,
         fullName: faker.person.fullName(),
-        kind: ADMIN,
+        kind: UserType.Admin,
       },
     });
   }
@@ -55,10 +55,10 @@ async function seed() {
   for (let i = 0; i < 5; i++) {
     const { id } = await prisma.user.create({
       data: {
-        emailAddress: faker.internet.email(),
+        emailAddress: faker.internet.email().toLowerCase().trim(),
         hashedPassword: HASHED_PASSWORD,
         fullName: faker.person.fullName(),
-        kind: APPLICANT,
+        kind: UserType.Applicant,
       },
       select: { id: true },
     });
@@ -72,10 +72,10 @@ async function seed() {
         data: {
           user: {
             create: {
-              emailAddress: faker.internet.email(),
+              emailAddress: faker.internet.email().toLowerCase().trim(),
               hashedPassword: HASHED_PASSWORD,
               fullName: faker.company.name(),
-              kind: LENDER,
+              kind: UserType.Lender,
             },
           },
           employmentPreferences: { create: { employmentTypeId } },

@@ -19,7 +19,7 @@ interface BoundaryErrorProps {
 function ContactSupport({ preFilledMessage }: { preFilledMessage: string }) {
   return (
     <a
-      className="text-white underline"
+      className="text-black underline"
       href={`mailto:allansimoyi@gmail.com?subject=I've encountered a problem&body=${preFilledMessage}`}
       target="_blank"
       rel="noopener noreferrer"
@@ -36,10 +36,10 @@ function createPrefilledMessage(message: string) {
 function BoundaryError(props: BoundaryErrorProps) {
   const { title, children } = props;
   return (
-    <div className="flex flex-col items-stretch justify-center space-y-6 rounded-md bg-white/10 p-6">
+    <div className="flex flex-col items-stretch justify-center space-y-6 overflow-auto rounded-md bg-black/10 p-6">
       <div className="flex flex-col items-center justify-center space-y-4">
         <AlertTriangle size={40} color="red" />
-        <h1 className="text-2xl font-semibold text-white">{title}</h1>
+        <h1 className="text-2xl font-semibold text-black">{title}</h1>
       </div>
       <div className="flex flex-col items-stretch justify-center space-y-6 text-center">
         {children}
@@ -71,9 +71,9 @@ function RouteCatchBoundary(props: RouterCatchBoundaryProps) {
       return (
         <BoundaryError title="Error 400 - Bad Request">
           {errorMessage ? (
-            <span className="text-center text-white/50">`{errorMessage}`</span>
+            <span className="text-center text-black/50">`{errorMessage}`</span>
           ) : null}
-          <span className="text-center leading-8 text-white/50">
+          <span className="text-center leading-8 text-black/50">
             We received a malformed or invalid request. <br />
             Please review your input and ensure it is valid. <br />
             If the issue persists,&nbsp;
@@ -91,9 +91,9 @@ function RouteCatchBoundary(props: RouterCatchBoundaryProps) {
       return (
         <BoundaryError title="Error 401 - Unauthorised">
           {errorMessage ? (
-            <span className="text-center text-white/50">`{errorMessage}`</span>
+            <span className="text-center text-black/50">`{errorMessage}`</span>
           ) : null}
-          <span className="text-center leading-8 text-white/50">
+          <span className="text-center leading-8 text-black/50">
             You are not authorised to access this resource. <br />
             Please ensure you are logged in before requesting for this resource.{' '}
             <br />
@@ -114,9 +114,9 @@ function RouteCatchBoundary(props: RouterCatchBoundaryProps) {
       return (
         <BoundaryError title="Error 403 - Forbidden">
           {errorMessage ? (
-            <span className="text-center text-white/50">`{errorMessage}`</span>
+            <span className="text-center text-black/50">`{errorMessage}`</span>
           ) : null}
-          <span className="text-center leading-8 text-white/50">
+          <span className="text-center leading-8 text-black/50">
             {"You don't have permission to access this resource."} <br />
             If the issue persists,&nbsp;
             <ContactSupport
@@ -137,12 +137,12 @@ function RouteCatchBoundary(props: RouterCatchBoundaryProps) {
           <div className="flex flex-col items-stretch justify-start space-y-4 px-6">
             {errorMessage ? (
               <div className="flex flex-col items-center justify-center">
-                <span className="text-center text-white/50">
+                <span className="text-center text-black/50">
                   `{errorMessage}`
                 </span>
               </div>
             ) : null}
-            <div className="flex flex-col items-stretch space-y-2 pb-6 text-white/50">
+            <div className="flex flex-col items-stretch space-y-2 pb-6 text-black/50">
               <div className="flex flex-col items-center justify-center">
                 <span className="text-center">
                   {"We couldn't find that resource."} <br />
@@ -198,16 +198,16 @@ export function ErrorBoundary() {
 
   return (
     <BoundaryError title="Error 500 - Internal Server Error">
-      <span className="text-center leading-8 text-white/50">
+      <span className="text-center leading-8 text-black/50">
         We encountered an unexpected error. <br />
         We are already working on fixing it. <br />
       </span>
       {errorMessage ? (
-        <span className="text-center font-bold text-white/50">
+        <span className="text-center font-bold text-black/50">
           `{errorMessage}` <br />
         </span>
       ) : null}
-      <span className="text-center leading-8 text-white/50">
+      <span className="text-center leading-8 text-black/50">
         Please try reloading the page. <br />
         If the issue persists,&nbsp;
         <ContactSupport

@@ -32,29 +32,29 @@ export function Toolbar(props: Props) {
   const showProgressBar = initShowProgressBar || nav.state !== 'idle';
 
   return (
-    <div className="flex flex-col items-stretch bg-white shadow-md">
+    <div className="flex flex-col items-stretch bg-white shadow-md print:shadow-none">
       {showProgressBar && (
         <div className="flex flex-col items-stretch py-0">
           <ProgressBar />
         </div>
       )}
       <CenteredView>
-        <div className="flex flex-row p-4 justify-center items-center">
+        <div className="flex flex-row items-center justify-center p-4">
           <div className="flex flex-row items-end gap-4">
             <Link to={AppLinks.Home}>
               <Logo small />
             </Link>
-            <UnderLineOnHover>
+            <UnderLineOnHover className="hidden sm:flex">
               <Link to={AppLinks.Home}>
-                <h1 className="text-indigo-600 text-2xl font-normal">
-                  ZIM LOANS ONLINE
+                <h1 className="text-2xl font-normal text-blue-600">
+                  QUICK LOANS
                 </h1>
               </Link>
             </UnderLineOnHover>
           </div>
           <div className="grow" />
           {!currentUser && (
-            <div className="hidden md:flex flex-row items-stretch gap-6">
+            <div className="hidden flex-row items-stretch gap-6 md:flex">
               {navItems.map((item) => (
                 <GhostButtonLink
                   key={item.text}
@@ -66,14 +66,13 @@ export function Toolbar(props: Props) {
               ))}
             </div>
           )}
-          <div className="flex flex-row items-center p-0 justify-end">
+          <div className="flex flex-row items-center justify-end p-0 pl-6 print:hidden">
             {!!currentUser && (
-              <span className="text-md px-4 text-nowrap">
+              <span className="hidden text-nowrap px-4 font-light md:flex">
                 {currentUser.fullName}
               </span>
             )}
             <DropDownMenu
-              className="md:hidden"
               isLoggedIn={!!currentUser}
               kind={currentUser?.kind || ''}
             />

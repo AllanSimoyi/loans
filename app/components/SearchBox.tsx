@@ -11,7 +11,7 @@ export function SearchBox(props: React.InputHTMLAttributes<HTMLInputElement>) {
       <div className="pointer-events-none flex items-center pl-2">
         <svg
           aria-hidden="true"
-          className="h-5 w-5 text-gray-500 dark:text-gray-400"
+          className="h-5 w-5 text-stone-500 dark:text-stone-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -27,7 +27,7 @@ export function SearchBox(props: React.InputHTMLAttributes<HTMLInputElement>) {
       </div>
       <input
         type="text"
-        className={`max-w-96 text-md grow rounded-none bg-transparent px-2 py-2 font-thin focus:outline-none`}
+        className={`text-md max-w-96 grow rounded-none bg-transparent px-2 py-2 font-thin focus:outline-none`}
         {...props}
       />
     </div>

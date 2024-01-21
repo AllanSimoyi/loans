@@ -1,11 +1,16 @@
 import type { ComponentProps } from 'react';
 
+import { twMerge } from 'tailwind-merge';
+
 export function UnderLineOnHover(props: ComponentProps<'div'>) {
-  const { children, ...restOfProps } = props;
+  const { children, className, ...restOfProps } = props;
   return (
-    <div className="group flex flex-col items-stretch gap-0" {...restOfProps}>
+    <div
+      className={twMerge('group flex flex-col items-stretch gap-0', className)}
+      {...restOfProps}
+    >
       {children}
-      <span className="block h-1 max-w-0 bg-indigo-600 transition-all duration-300 group-hover:max-w-full" />
+      <span className="block h-1 max-w-0 bg-blue-600 transition-all duration-300 group-hover:max-w-full" />
     </div>
   );
 }

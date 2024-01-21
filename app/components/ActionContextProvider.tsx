@@ -1,4 +1,4 @@
-import type { FieldErrors, FormFields, ActionData } from '../models/forms';
+import type { FieldErrors, FormFields } from '../models/forms';
 import type { Fetcher } from '@remix-run/react';
 import type { ZodTypeAny, z } from 'zod';
 
@@ -61,7 +61,7 @@ export function useIsSubmitting() {
 }
 
 export function useForm<T extends ZodTypeAny>(
-  fetcher: { data?: ActionData; state: Fetcher['state'] },
+  fetcher: { data?: Fetcher['data']; state: Fetcher['state'] } | undefined,
   Schema: T,
 ) {
   type SchemaKeys = keyof z.infer<typeof Schema>;
@@ -71,28 +71,28 @@ export function useForm<T extends ZodTypeAny>(
   }, []);
 
   const fieldErrors = useMemo(() => {
-    if (hasFieldErrors(fetcher.data)) {
+    if (fetcher && hasFieldErrors(fetcher.data)) {
       return fetcher.data.fieldErrors as FieldErrors<SchemaKeys>;
     }
-  }, [fetcher.data]);
+  }, [fetcher]);
 
   const formError = useMemo(() => {
-    if (hasFormError(fetcher.data)) {
+    if (fetcher && hasFormError(fetcher.data)) {
       return fetcher.data.formError;
     }
-  }, [fetcher.data]);
+  }, [fetcher]);
 
   const fields = useMemo(() => {
-    if (hasFields(fetcher.data)) {
+    if (fetcher && hasFields(fetcher.data)) {
       return fetcher.data.fields as FormFields<SchemaKeys>;
     }
-  }, [fetcher.data]);
+  }, [fetcher]);
 
   return {
     getNameProp,
     fieldErrors,
     formError,
     fields,
-    isProcessing: fetcher.state !== 'idle',
+    isProcessing: fetcher?.state !== 'idle',
   };
 }

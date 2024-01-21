@@ -11,17 +11,13 @@ import {
   ActionContextProvider,
   useForm,
 } from '~/components/ActionContextProvider';
+import { RouteErrorBoundary } from '~/components/Boundaries';
 import { FormTextField } from '~/components/FormTextField';
 import { GhostButtonLink } from '~/components/GhostButton';
 import { InlineAlert } from '~/components/InlineAlert';
 import { Logo } from '~/components/Logo';
 import { PrimaryButton } from '~/components/PrimaryButton';
-import {
-  ADMIN,
-  APPLICANT,
-  CreateAccountSchema,
-  LENDER,
-} from '~/models/auth.validations';
+import { CreateAccountSchema, UserType } from '~/models/auth.validations';
 import { badRequest, processBadRequest } from '~/models/core.validations';
 import { getRawFormFields } from '~/models/forms';
 import { AppLinks } from '~/models/links';
@@ -29,13 +25,16 @@ import { createUser, getUserByEmail } from '~/models/user.server';
 import { createUserSession, getUser } from '~/session.server';
 
 export const meta: MetaFunction = () => [
-  { title: 'Zim Loans Online - Create Account' },
+  { title: 'Quick Loans - Create Account' },
 ];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const currentUser = await getUser(request);
   if (currentUser) {
-    if (currentUser.kind === ADMIN || currentUser.kind === LENDER) {
+    if (
+      currentUser.kind === UserType.Admin ||
+      currentUser.kind === UserType.Lender
+    ) {
       return redirect(AppLinks.Applications);
     }
     return redirect('/');
@@ -66,7 +65,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     emailAddress,
     password,
     fullName,
-    kind: APPLICANT,
+    kind: UserType.Applicant,
   });
   return createUserSession({
     request,
@@ -87,22 +86,22 @@ export default function Join() {
   );
 
   return (
-    <div className="flex flex-col justify-center items-center">
+    <div className="flex flex-col items-center justify-center">
       <Form
         method="post"
-        className="flex flex-col items-stretch w-[100%] sm:w-[80%] md:w-[60%] lg:w-[30%] gap-6"
+        className="flex w-[100%] flex-col items-stretch gap-6 sm:w-[80%] md:w-[60%] lg:w-[30%]"
       >
         <ActionContextProvider {...actionData} isSubmitting={isProcessing}>
-          <div className="flex flex-col justify-center items-center p-4">
+          <div className="flex flex-col items-center justify-center p-4">
             <Link
               to={AppLinks.Home}
-              className="flex flex-col justify-center items-center w-2/5"
+              className="flex w-2/5 flex-col items-center justify-center"
             >
               <Logo />
             </Link>
           </div>
           <div className="flex flex-col items-stretch gap-4 pb-4">
-            <div className="flex flex-col justify-center items-center">
+            <div className="flex flex-col items-center justify-center">
               <span className="text-xl font-normal text-stone-600">
                 Create An Account
               </span>
@@ -144,4 +143,8 @@ export default function Join() {
       </Form>
     </div>
   );
+}
+
+export function ErrorBoundary() {
+  return <RouteErrorBoundary />;
 }

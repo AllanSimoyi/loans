@@ -19,7 +19,7 @@ import { useOptionalUser } from '~/utils';
 
 import banner from '../../public/images/stacks.png';
 
-export const meta: MetaFunction = () => [{ title: 'Zim Loans Online' }];
+export const meta: MetaFunction = () => [{ title: 'Quick Loans' }];
 
 const Schema = z.object({
   employmentTypeId: z.coerce.number().int().min(0).optional(),
@@ -116,16 +116,16 @@ export default function Index() {
   return (
     <div className="flex flex-col items-stretch">
       <Toolbar currentUser={user} />
-      <div className="flex flex-col items-stretch h-[80vh] lg:h-[80vh] py-4 bg-indigo-600">
+      <div className="flex h-[80vh] flex-col items-stretch bg-blue-600 py-4 lg:h-[80vh]">
         <CenteredView className="grow">
-          <div className="flex flex-col justify-center items-center lg:flex-row lg:justify-start p-4 grow">
-            <div className="flex flex-col justify-center items-center lg:items-start gap-12 w-full lg:w-[70%] py-4 lg:py-8">
-              <h2 className="text-4xl md:text-6xl text-white text-center lg:text-start">
+          <div className="flex grow flex-col items-center justify-center p-4 lg:flex-row lg:justify-start">
+            <div className="flex w-full flex-col items-center justify-center gap-12 py-4 lg:w-[70%] lg:items-start lg:py-8">
+              <h2 className="text-center text-4xl text-white md:text-6xl lg:text-start">
                 Get Quick Loans
               </h2>
-              <div className="hidden md:flex grow" />
-              <div className="flex flex-col items-center md:items-stretch gap-2">
-                <ul className="text-white text-base md:text-xl list-none">
+              <div className="hidden grow md:flex" />
+              <div className="flex flex-col items-center gap-2 md:items-stretch">
+                <ul className="list-none text-base text-white md:text-xl">
                   <li className="my-4">
                     &middot; Tell us what you're looking for
                   </li>
@@ -138,23 +138,23 @@ export default function Index() {
                 </ul>
               </div>
             </div>
-            <div className="lg:flex flex-row items-center grow hidden">
+            <div className="hidden grow flex-row items-center lg:flex">
               <img
                 src={banner}
-                className="object-contain h-[50vh]"
+                className="h-[50vh] object-contain"
                 alt="Money"
               />
             </div>
           </div>
         </CenteredView>
       </div>
-      <div className="flex flex-col items-stretch px-4 lg:p-0 -mt-12">
+      <div className="-mt-12 flex flex-col items-stretch px-4 lg:p-0">
         <CenteredView>
           <Form method="get" className="flex flex-col items-stretch">
             <ActionContextProvider fields={fields} isSubmitting={isProcessing}>
-              <Card className="grow bg-white rounded-lg shadow-2xl">
-                <div className="flex flex-col items-stretch lg:flex-row p-4 gap-4">
-                  <div className="flex flex-col items-stretch grow basis-[33%]">
+              <Card className="grow rounded-lg bg-white shadow-2xl">
+                <div className="flex flex-col items-stretch gap-4 p-4 lg:flex-row">
+                  <div className="flex grow basis-[33%] flex-col items-stretch">
                     <FormSelect
                       name="employmentTypeId"
                       label="Your Type Of Work"
@@ -167,7 +167,7 @@ export default function Index() {
                       ))}
                     </FormSelect>
                   </div>
-                  <div className="flex flex-col items-stretch grow basis-[33%]">
+                  <div className="flex grow basis-[33%] flex-col items-stretch">
                     <FormTextField
                       name="requiredAmount"
                       step=".01"
@@ -176,7 +176,7 @@ export default function Index() {
                       placeholder="E.g. 45000"
                     />
                   </div>
-                  <div className="flex flex-col items-stretch grow basis-[33%]">
+                  <div className="flex grow basis-[33%] flex-col items-stretch">
                     <FormTextField
                       name="repaymentPeriod"
                       type="number"
@@ -186,7 +186,7 @@ export default function Index() {
                     />
                   </div>
                 </div>
-                <div className="absolute invisible flex flex-col justify-center items-end px-4 py-2">
+                <div className="invisible absolute flex flex-col items-end justify-center px-4 py-2">
                   <PrimaryButton type="submit" disabled={isProcessing}>
                     {isProcessing ? 'SEARCHING...' : 'FIND MATCHING LOANS'}
                   </PrimaryButton>
@@ -196,7 +196,7 @@ export default function Index() {
           </Form>
         </CenteredView>
       </div>
-      <div className="flex flex-col items-stretch px-4 lg:px-0 py-16 border-b border-b-gray-400">
+      <div className="flex flex-col items-stretch border-b border-b-stone-400 px-4 py-16 lg:px-0">
         <CenteredView>
           <div className="flex flex-row items-center gap-6 pb-8">
             <span className="text-2xl font-normal">
@@ -206,14 +206,14 @@ export default function Index() {
             {tags.map((tag) => (
               <div
                 key={tag}
-                className="flex flex-row items-center gap-4 bg-black/10 rounded-full px-4 py-1"
+                className="flex flex-row items-center gap-4 rounded-full bg-black/10 px-4 py-1"
               >
-                <span className="font-normal text-sm">{tag}</span>
+                <span className="text-sm font-normal">{tag}</span>
                 <X className="text-red-600" />
               </div>
             ))}
           </div>
-          <Catalog lenders={lenders} />
+          <Catalog lenders={lenders} userType={user?.kind} />
         </CenteredView>
       </div>
       <Footer />

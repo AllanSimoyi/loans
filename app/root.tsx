@@ -1,5 +1,6 @@
 import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
 
+import { Cloudinary } from '@cloudinary/url-gen';
 import { cssBundleHref } from '@remix-run/css-bundle';
 import { json } from '@remix-run/node';
 import {
@@ -9,11 +10,17 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from '@remix-run/react';
+import { useMemo } from 'react';
+import { Toaster } from 'sonner';
 
 import customStylesUrl from '~/custom.css';
 import { getUser } from '~/session.server';
 import stylesheet from '~/tailwind.css';
+
+import { CloudinaryContextProvider } from './components/CloudinaryContextProvider';
+import { Env } from './models/environment';
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: stylesheet },
@@ -26,10 +33,22 @@ export const links: LinksFunction = () => [
 ];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  return json({ user: await getUser(request) });
+  const user = await getUser(request);
+
+  const CLOUD_NAME = Env.CLOUDINARY_CLOUD_NAME;
+  const UPLOAD_RESET = Env.CLOUDINARY_UPLOAD_RESET;
+
+  return json({ user, CLOUD_NAME, UPLOAD_RESET });
 };
 
 export default function App() {
+  const { user, CLOUD_NAME, UPLOAD_RESET } = useLoaderData<typeof loader>();
+  console.log('current user', user?.emailAddress);
+
+  const CloudinaryUtil = useMemo(() => {
+    return new Cloudinary({ cloud: { cloudName: CLOUD_NAME } });
+  }, [CLOUD_NAME]);
+
   return (
     <html lang="en" className="h-full">
       <head>
@@ -40,7 +59,14 @@ export default function App() {
       </head>
       <style></style>
       <body className="h-full">
-        <Outlet />
+        <CloudinaryContextProvider
+          CLOUDINARY_CLOUD_NAME={CLOUD_NAME}
+          CLOUDINARY_UPLOAD_RESET={UPLOAD_RESET}
+          CloudinaryUtil={CloudinaryUtil}
+        >
+          <Outlet />
+          <Toaster />
+        </CloudinaryContextProvider>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />

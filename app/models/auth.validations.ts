@@ -100,6 +100,8 @@ export interface CurrentUser {
   kind: string;
 }
 
-export const ADMIN = 'Admin';
-export const LENDER = 'Lender';
-export const APPLICANT = 'Applicant';
+export enum UserType {
+  Admin = 'Admin',
+  Lender = 'Lender',
+  Applicant = 'Applicant',
+}

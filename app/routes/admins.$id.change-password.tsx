@@ -48,17 +48,17 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   }
 
   const id = getValidatedId(params.id);
-  const lender = await prisma.lender.findUnique({
+  const admin = await prisma.user.findUnique({
     where: { id },
-    select: { user: { select: { fullName: true } } },
+    select: { fullName: true },
   });
-  if (!lender) {
-    throw new Response('Lender record not found', {
+  if (!admin) {
+    throw new Response('Admin record not found', {
       status: StatusCode.NotFound,
     });
   }
 
-  return json({ lender });
+  return json({ admin });
 }
 
 const Schema = z
@@ -87,30 +87,20 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
     const { newPassword } = result.data;
 
-    const lender = await prisma.lender.findUnique({
-      where: { id },
-      select: { userId: true },
-    });
-    if (!lender) {
-      throw new Response('Lender record not found', {
-        status: StatusCode.NotFound,
-      });
-    }
-
     await prisma.user.update({
-      where: { id: lender.userId },
+      where: { id },
       data: { hashedPassword: await createPasswordHash(newPassword) },
     });
 
-    return redirect(AppLinks.Lender(id));
+    return redirect(AppLinks.Admins);
   } catch (error) {
     return badRequest({ formError: getErrorMessage(error) });
   }
 }
 
-export default function LendersIdChangePassword() {
+export default function AdminsIdChangePassword() {
   const user = useUser();
-  const { lender } = useLoaderData<typeof loader>();
+  const { admin } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
 
   const nav = useNavigation();
@@ -134,9 +124,7 @@ export default function LendersIdChangePassword() {
             )}
             <div className="flex flex-col items-stretch gap-4 py-4">
               <Card>
-                <CardHeading>
-                  {lender.user.fullName} - Change Password
-                </CardHeading>
+                <CardHeading>{admin.fullName} - Change Password</CardHeading>
                 <CardSection className="gap-4 py-4" noBottomBorder>
                   <FormTextField
                     type="password"

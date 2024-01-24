@@ -7,19 +7,23 @@ export const AppLinks = {
   MyAccount: '/my-account',
   ChangePassword: '/change-password',
 
+  Lenders: '/lenders',
   AddLender: '/lenders/add',
   Lender: (id: number) => `/lenders/${id}`,
   EditLender: (id: number) => `/lenders/${id}/edit`,
   ChangeLenderPassword: (id: number) => `/lenders/${id}/change-password`,
   LenderEmploymentTypes: (id: number) => `/lenders/${id}/employment-types`,
 
-  Apply: '/apply',
+  Admins: '/admins',
+  AddAdmin: '/admins/add',
+  EditAdmin: (id: number) => `/admins/${id}/edit`,
+  ChangeAdminPassword: (id: number) => `/admins/${id}/change-password`,
+
   Applications: '/applications',
+  Apply: '/apply',
   Application: (id: number) => `/applications/${id}`,
   ApplicationLenders: (id: number) => `/applications/${id}/lenders`,
   EditApplication: (id: number) => `/applications/${id}/edit`,
 
-  Lenders: '/lenders',
-  Admins: '/admins',
   Employment: '/employment',
 } as const;

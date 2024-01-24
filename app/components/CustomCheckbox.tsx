@@ -9,7 +9,7 @@ export function CustomCheckbox(props: Props) {
   const { error } = useField(name!);
 
   return (
-    <div className="flex flex-col items-start gap-6">
+    <div className="flex flex-col items-start gap-4">
       <label className="cursor-pointer rounded-md p-2 transition-all duration-300 hover:bg-stone-100">
         <input
           type="checkbox"

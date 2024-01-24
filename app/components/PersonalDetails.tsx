@@ -23,10 +23,10 @@ export function PersonalDetails(props: Props) {
   return (
     <Card>
       <CardHeading>1. Personal Details</CardHeading>
-      <CardSection className="gap-6" noBottomBorder>
+      <CardSection className="gap-4" noBottomBorder>
         <input type="hidden" {...getNameProp('fullMaidenNames')} value="" />
         <input type="hidden" {...getNameProp('fullNameOfSpouse')} value="" />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <FormSelect {...getNameProp('title')} label="Title">
             <option value="Mr">Mr</option>
             <option value="Mrs">Mrs</option>
@@ -41,7 +41,7 @@ export function PersonalDetails(props: Props) {
             placeholder="Full Name"
           />
         </div>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <FormTextField
             type="date"
             {...getNameProp('DOB')}
@@ -55,7 +55,7 @@ export function PersonalDetails(props: Props) {
             </option>
           </FormSelect>
         </div>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <FormTextField
             {...getNameProp('nationalID')}
             label="National ID (##-######-A##)"
@@ -67,7 +67,7 @@ export function PersonalDetails(props: Props) {
             placeholder="Phone Number"
           />
         </div>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <FormTextField
             {...getNameProp('resAddress')}
             label="Residential Address"

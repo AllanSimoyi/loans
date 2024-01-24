@@ -28,6 +28,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const lenders = await prisma.lender
     .findMany({
+      where: { deactivated: false },
       select: {
         id: true,
         user: { select: { fullName: true, emailAddress: true } },

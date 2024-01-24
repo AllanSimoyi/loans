@@ -63,13 +63,13 @@ export function PriorLoanDetails(props: Props) {
         </div>
       </CardSection>
       {open && (
-        <CardSection className="gap-6" noBottomBorder>
+        <CardSection className="gap-4" noBottomBorder>
           <FormTextField
             {...getNameProp('priorLoanLender')}
             label="Lender"
             placeholder="Lender"
           />
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <FormTextField
               {...getNameProp('priorLoanExpiryDate')}
               type="date"
@@ -85,7 +85,7 @@ export function PriorLoanDetails(props: Props) {
               placeholder="Amount"
             />
           </div>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <FormTextField
               {...getNameProp('priorLoanMonthlyRepayment')}
               type="number"

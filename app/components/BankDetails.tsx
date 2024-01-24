@@ -18,8 +18,8 @@ export function BankDetails(props: Props) {
   return (
     <Card>
       <CardHeading>3. Bank Details</CardHeading>
-      <CardSection className="gap-6" noBottomBorder>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <CardSection className="gap-4" noBottomBorder>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <FormTextField
             {...getNameProp('bank')}
             label="Bank"
@@ -31,7 +31,7 @@ export function BankDetails(props: Props) {
             placeholder="Bank Branch"
           />
         </div>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <FormTextField
             {...getNameProp('accNumber')}
             label="Account Number"

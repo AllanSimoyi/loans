@@ -148,7 +148,7 @@ export default function MyAccount() {
               {hasFormError(actionData) && (
                 <InlineAlert>{actionData.formError}</InlineAlert>
               )}
-              <CardSection className="gap-6 py-6">
+              <CardSection className="gap-4 py-6">
                 <FormTextField
                   {...getNameProp('fullName')}
                   label="Full Name"

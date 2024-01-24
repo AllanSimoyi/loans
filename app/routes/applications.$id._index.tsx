@@ -21,6 +21,7 @@ import { CardSection } from '~/components/CardSection';
 import { CenteredView } from '~/components/CenteredView';
 import { DangerButton } from '~/components/DangerButton';
 import { KycImage } from '~/components/KycImage';
+import { LabeledDetail } from '~/components/LabeledDetail';
 import { PrimaryButton, PrimaryButtonLink } from '~/components/PrimaryButton';
 import { Toolbar } from '~/components/Toolbar';
 import { prisma } from '~/db.server';
@@ -602,22 +603,6 @@ function Decision(props: {
       {!!comment && (
         <span className="text-sm font-light text-stone-600">"{comment}"</span>
       )}
-    </div>
-  );
-}
-
-interface Props {
-  details: [string, string];
-}
-function LabeledDetail(props: Props) {
-  const {
-    details: [label, detail],
-  } = props;
-  return (
-    // <div className="flex flex-col items-stretch rounded bg-stone-100 p-2">
-    <div className="flex flex-col items-stretch">
-      <span className="text-xs font-light text-stone-600">{label}</span>
-      <span className="text-stone-600">{detail}</span>
     </div>
   );
 }

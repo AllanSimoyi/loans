@@ -46,7 +46,7 @@ export function UploadDocuments(props: Props) {
             <InlineAlert>{error}</InlineAlert>
           </div>
         )}
-        <div className="flex flex-col items-stretch gap-6">
+        <div className="flex flex-col items-stretch gap-4">
           <UploadImage {...nationalIdKyc} identifier={KycDoc.NationalID} />
           <UploadImage
             {...proofOfResidenceKyc}

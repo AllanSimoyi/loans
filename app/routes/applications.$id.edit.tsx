@@ -304,7 +304,7 @@ export default function ApplicationsIdEdit() {
           <div className="flex flex-col items-center justify-center p-4">
             <span className="text-base font-semibold">Edit Application</span>
           </div>
-          <Form method="post" className="flex flex-col items-stretch gap-6">
+          <Form method="post" className="flex flex-col items-stretch gap-4">
             <ActionContextProvider
               {...actionData}
               fields={actionData?.fields || defaultValues}

@@ -182,7 +182,7 @@ export default function ApplicationsIdLenders() {
   }
 
   return (
-    <div className="flex flex-col items-stretch gap-6">
+    <div className="flex flex-col items-stretch gap-4">
       <Toolbar currentUser={user} />
       <CenteredView>
         <Form method="post">

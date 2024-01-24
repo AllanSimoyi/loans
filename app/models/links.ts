@@ -8,7 +8,10 @@ export const AppLinks = {
   ChangePassword: '/change-password',
 
   AddLender: '/lenders/add',
-  Lender: (id: number) => `'/lenders/${id}`,
+  Lender: (id: number) => `/lenders/${id}`,
+  EditLender: (id: number) => `/lenders/${id}/edit`,
+  ChangeLenderPassword: (id: number) => `/lenders/${id}/change-password`,
+  LenderEmploymentTypes: (id: number) => `/lenders/${id}/employment-types`,
 
   Apply: '/apply',
   Applications: '/applications',

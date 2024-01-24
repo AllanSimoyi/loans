@@ -1,5 +1,5 @@
-import { faker } from '@faker-js/faker';
 import {
+  json,
   redirect,
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
@@ -28,54 +28,58 @@ import { PrimaryButton } from '~/components/PrimaryButton';
 import { Toolbar } from '~/components/Toolbar';
 import { UploadLogo } from '~/components/UploadLogo';
 import { prisma } from '~/db.server';
-import {
-  EmailAddressSchema,
-  PasswordSchema,
-  UserType,
-} from '~/models/auth.validations';
+import { EmailAddressSchema, UserType } from '~/models/auth.validations';
 import {
   StatusCode,
   badRequest,
+  getValidatedId,
   processBadRequest,
 } from '~/models/core.validations';
 import { getErrorMessage } from '~/models/errors';
 import { getRawFormFields, hasFormError } from '~/models/forms';
-import { createPasswordHash } from '~/models/hashing.server';
 import { AppLinks } from '~/models/links';
 import { requireUser } from '~/session.server';
 import { useUser } from '~/utils';
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
   const currentUser = await requireUser(request);
   if (currentUser.kind !== UserType.Admin) {
     throw new Response("You're not authorised to view this page", {
       status: StatusCode.Forbidden,
     });
   }
-  return null;
+
+  const id = getValidatedId(params.id);
+  const lender = await prisma.lender.findUnique({
+    where: { id },
+    include: {
+      user: true,
+      employmentPreferences: { include: { employmentType: true } },
+    },
+  });
+  if (!lender) {
+    throw new Response('Lender record not found', {
+      status: StatusCode.NotFound,
+    });
+  }
+
+  return json({ lender });
 }
 
-const Schema = z
-  .object({
-    fullName: z.string().min(1).max(50),
-    emailAddress: EmailAddressSchema,
-    password: PasswordSchema,
-    passwordConfirmation: PasswordSchema,
+const Schema = z.object({
+  fullName: z.string().min(1).max(50),
+  emailAddress: EmailAddressSchema,
 
-    logoPublicId: z.string(),
-    minTenure: z.coerce.number().int().min(1),
-    maxTenure: z.coerce.number().int().min(1),
-    minAmount: z.coerce.number().min(1),
-    maxAmount: z.coerce.number().min(1),
-    monthlyInterest: z.coerce.number().min(0),
-    adminFee: z.coerce.number().min(0),
-    applicationFee: z.coerce.number().min(0),
-  })
-  .refine((arg) => arg.password === arg.passwordConfirmation, {
-    message: "Passwords don't match",
-    path: ['passwordConfirmation'],
-  });
-export async function action({ request }: ActionFunctionArgs) {
+  logoPublicId: z.string(),
+  minTenure: z.coerce.number().int().min(1),
+  maxTenure: z.coerce.number().int().min(1),
+  minAmount: z.coerce.number().min(1),
+  maxAmount: z.coerce.number().min(1),
+  monthlyInterest: z.coerce.number().min(0),
+  adminFee: z.coerce.number().min(0),
+  applicationFee: z.coerce.number().min(0),
+});
+export async function action({ request, params }: ActionFunctionArgs) {
   const currentUser = await requireUser(request);
   if (currentUser.kind !== UserType.Admin) {
     throw new Response("You're not authorised to view this page", {
@@ -84,67 +88,57 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   try {
+    const id = getValidatedId(params.id);
     const fields = await getRawFormFields(request);
     const result = Schema.safeParse(fields);
     if (!result.success) {
       return processBadRequest(result.error, fields);
     }
-    const {
-      fullName,
-      emailAddress,
-      password,
-      logoPublicId,
-      minTenure,
-      maxTenure,
-      minAmount,
-      maxAmount,
-      monthlyInterest,
-      adminFee,
-      applicationFee,
-    } = result.data;
+    const input = result.data;
 
-    const numDuplicates = await prisma.user.count({
-      where: { emailAddress },
+    const lender = await prisma.lender.findUnique({
+      where: { id },
+      select: { userId: true },
     });
-    if (numDuplicates) {
-      return badRequest<keyof z.infer<typeof Schema>>({
-        fieldErrors: { emailAddress: ['Email address already used'] },
+    if (!lender) {
+      throw new Response('Lender record not found', {
+        status: StatusCode.NotFound,
       });
     }
 
-    await prisma.lender.create({
-      data: {
-        logo: '',
-        logoPublicId,
-        logoWidth: 0,
-        logoHeight: 0,
-        minTenure,
-        maxTenure,
-        minAmount,
-        maxAmount,
-        monthlyInterest,
-        adminFee,
-        applicationFee,
-        user: {
-          create: {
-            fullName,
-            emailAddress,
-            kind: UserType.Lender,
-            hashedPassword: await createPasswordHash(password.trim()),
-          },
+    await prisma.$transaction(async (tx) => {
+      await tx.lender.update({
+        where: { id },
+        data: {
+          logo: '',
+          logoPublicId: input.logoPublicId,
+          minTenure: input.minTenure,
+          maxTenure: input.maxTenure,
+          minAmount: input.minAmount,
+          maxAmount: input.maxAmount,
+          monthlyInterest: input.monthlyInterest,
+          adminFee: input.adminFee,
+          applicationFee: input.applicationFee,
         },
-      },
+      });
+      await tx.user.update({
+        where: { id: lender.userId },
+        data: {
+          emailAddress: input.emailAddress,
+          fullName: input.fullName,
+        },
+      });
     });
 
-    return redirect(AppLinks.Lenders);
+    return redirect(AppLinks.Lender(id));
   } catch (error) {
     return badRequest({ formError: getErrorMessage(error) });
   }
 }
 
-export default function LendersAdd() {
+export default function LendersIdEdit() {
   const user = useUser();
-  useLoaderData<typeof loader>();
+  const { lender } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
 
   const nav = useNavigation();
@@ -157,25 +151,17 @@ export default function LendersAdd() {
     keyof z.infer<typeof Schema>,
     string | undefined
   > = {
-    fullName: faker.person.fullName(),
-    emailAddress: faker.internet.email(),
-    password: '',
-    passwordConfirmation: '',
+    fullName: lender.user.fullName,
+    emailAddress: lender.user.emailAddress,
 
-    logoPublicId: '',
-    minTenure: faker.number.int({ min: 1, max: 3 }).toString(),
-    maxTenure: faker.number.int({ min: 4, max: 12 }).toString(),
-    minAmount: faker.number.float({ max: 200, precision: 0.01 }).toString(),
-    maxAmount: faker.number.float({ max: 10_000, precision: 0.01 }).toString(),
-    monthlyInterest: faker.number
-      .float({ min: 1, max: 50, precision: 0.01 })
-      .toString(),
-    adminFee: faker.number
-      .float({ min: 1, max: 20, precision: 0.01 })
-      .toString(),
-    applicationFee: faker.number
-      .float({ min: 1, max: 20, precision: 0.01 })
-      .toString(),
+    logoPublicId: lender.logoPublicId?.toString() || '',
+    minTenure: lender.minTenure.toString(),
+    maxTenure: lender.maxTenure.toString(),
+    minAmount: lender.minAmount.toString(),
+    maxAmount: lender.maxAmount.toString(),
+    monthlyInterest: lender.monthlyInterest.toString(),
+    adminFee: lender.adminFee.toString(),
+    applicationFee: lender.applicationFee.toString(),
   };
 
   return (
@@ -189,15 +175,16 @@ export default function LendersAdd() {
         <Form method="post">
           <ActionContextProvider
             {...actionData}
-            fields={defaultValues}
+            fields={actionData?.fields || defaultValues}
             isSubmitting={isProcessing}
           >
+            <input type="hidden" name="lender.id" value={lender?.id || 0} />
             {hasFormError(actionData) && (
               <InlineAlert>{actionData.formError}</InlineAlert>
             )}
             <div className="flex flex-col items-stretch gap-4 py-4">
               <Card>
-                <CardHeading>Add Lender</CardHeading>
+                <CardHeading>Edit Lender</CardHeading>
                 <CardSection className="gap-4 py-6" noBottomBorder>
                   <FormTextField
                     {...getNameProp('fullName')}
@@ -209,26 +196,14 @@ export default function LendersAdd() {
                     label="Email Address"
                     placeholder="you@example.com"
                   />
-                  <FormTextField
-                    {...getNameProp('password')}
-                    label="Password"
-                    placeholder="Password"
-                    type="password"
-                  />
-                  <FormTextField
-                    {...getNameProp('passwordConfirmation')}
-                    label="Re-enter Password"
-                    placeholder="Re-enter Password"
-                    type="password"
-                  />
                 </CardSection>
               </Card>
               <Card>
                 <CardHeading>Logo</CardHeading>
                 <CardSection className="py-6" noBottomBorder>
                   <UploadLogo
-                    initialPublicId={undefined}
-                    {...getNameProp('logoPublicId')}
+                    initialPublicId={lender?.logoPublicId}
+                    name="logoPublicId"
                   />
                 </CardSection>
               </Card>
@@ -293,7 +268,7 @@ export default function LendersAdd() {
                 </CardSection>
                 <CardSection noBottomBorder>
                   <PrimaryButton type="submit" disabled={isProcessing}>
-                    {isProcessing ? 'Adding Lender...' : 'Add Lender'}
+                    {isProcessing ? 'Updating Lender...' : 'Update Lender'}
                   </PrimaryButton>
                 </CardSection>
               </Card>

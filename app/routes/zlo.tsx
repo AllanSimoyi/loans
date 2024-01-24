@@ -60,23 +60,23 @@ export default function Zlo() {
   const relevant = [...approved, ...pending, ...declined];
 
   return (
-    <div className="flex flex-col items-stretch gap-6 overflow-auto p-8">
+    <div className="flex flex-col items-stretch gap-4 overflow-auto p-8">
       <div className="flex flex-col items-stretch">
         <span className="text-stone-600">
           Loan Applications As At 12 Jan 2024
         </span>
       </div>
-      <div className="flex flex-col items-stretch gap-6">
+      <div className="flex flex-col items-stretch gap-4">
         {relevant.map((app, index) => (
           <div
             key={index}
-            className="flex flex-row items-stretch gap-6 rounded-lg border border-stone-100 bg-stone-100 p-6 shadow-xl"
+            className="flex flex-row items-stretch gap-4 rounded-lg border border-stone-100 bg-stone-100 p-6 shadow-xl"
           >
             <div className="flex flex-col items-stretch">
               <span className="text-xs text-stone-400">#</span>
               <span className="text-sm text-stone-600">{index + 1}.</span>
             </div>
-            <div className="grid grow grid-cols-1 gap-6 lg:grid-cols-4">
+            <div className="grid grow grid-cols-1 gap-4 lg:grid-cols-4">
               <GridItem
                 label="Amount"
                 value={`ZWL ${formatAmount(app.amtRequired)}`}

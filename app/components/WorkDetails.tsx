@@ -18,13 +18,13 @@ export function WorkDetails(props: Props) {
   return (
     <Card>
       <CardHeading>4. Work Details</CardHeading>
-      <CardSection className="gap-6" noBottomBorder>
+      <CardSection className="gap-4" noBottomBorder>
         <FormTextField
           {...getNameProp('profession')}
           label="Profession"
           placeholder="Profession"
         />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <FormTextField
             {...getNameProp('employer')}
             label="Employer"
@@ -37,7 +37,7 @@ export function WorkDetails(props: Props) {
             placeholder="Employed Since"
           />
         </div>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <FormTextField
             {...getNameProp('grossIncome')}
             type="number"

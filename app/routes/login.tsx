@@ -100,7 +100,7 @@ export default function LoginPage() {
     <div className="flex h-full flex-col items-center justify-center p-2">
       <Form
         method="post"
-        className="flex w-[100%] flex-col items-stretch gap-6 sm:w-[80%] md:w-[60%] lg:w-[30%]"
+        className="flex w-[100%] flex-col items-stretch gap-4 sm:w-[80%] md:w-[60%] lg:w-[30%]"
       >
         <ActionContextProvider {...actionData} isSubmitting={isProcessing}>
           <div className="flex flex-col items-center justify-center p-4">

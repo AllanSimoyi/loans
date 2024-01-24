@@ -117,7 +117,7 @@ export default function ChangePassword() {
           <Form method="post" className="flex flex-col items-stretch">
             <ActionContextProvider {...actionData} isSubmitting={isProcessing}>
               <CardHeading className="items-start">Change Password</CardHeading>
-              <CardSection className="gap-6">
+              <CardSection className="gap-4">
                 <FormTextField
                   type="password"
                   {...getNameProp('oldPassword')}

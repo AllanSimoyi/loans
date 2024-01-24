@@ -18,14 +18,14 @@ export function NextOfKinDetails(props: Props) {
   return (
     <Card>
       <CardHeading>6. Next of Kin</CardHeading>
-      <CardSection className="gap-6">
+      <CardSection className="gap-4">
         <span className="text-lg font-bold">First Next of Kin:</span>
         <FormTextField
           {...getNameProp('firstNokFullName')}
           label="Full Name"
           placeholder="Full Name"
         />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <FormTextField
             {...getNameProp('firstNokRelationship')}
             label="Relationship"
@@ -37,7 +37,7 @@ export function NextOfKinDetails(props: Props) {
             placeholder="Phone Number"
           />
         </div>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <FormTextField
             {...getNameProp('firstNokEmployer')}
             label="Employer"
@@ -50,14 +50,14 @@ export function NextOfKinDetails(props: Props) {
           />
         </div>
       </CardSection>
-      <CardSection className="gap-6" noBottomBorder>
+      <CardSection className="gap-4" noBottomBorder>
         <span className="text-lg font-bold">Second Next of Kin:</span>
         <FormTextField
           {...getNameProp('secondNokFullName')}
           label="Full Name"
           placeholder="Full Name"
         />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <FormTextField
             {...getNameProp('secondNokRelationship')}
             label="Relationship"
@@ -69,7 +69,7 @@ export function NextOfKinDetails(props: Props) {
             placeholder="Phone Number"
           />
         </div>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <FormTextField
             {...getNameProp('secondNokEmployer')}
             label="Employer"

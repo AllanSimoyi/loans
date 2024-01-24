@@ -18,14 +18,14 @@ export function Credentials(props: Props) {
   return (
     <Card>
       <CardHeading>8. Track Application</CardHeading>
-      <CardSection className="gap-6" noBottomBorder>
+      <CardSection className="gap-4" noBottomBorder>
         <FormTextField
           {...getNameProp('emailAddress')}
           type="email"
           label="Email Address"
           placeholder="Email Address"
         />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <FormTextField
             {...getNameProp('password')}
             type="password"

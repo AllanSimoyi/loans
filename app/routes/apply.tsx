@@ -287,7 +287,7 @@ export default function Apply() {
               </span>
             </span>
           </div>
-          <Form method="post" className="flex flex-col items-stretch gap-6">
+          <Form method="post" className="flex flex-col items-stretch gap-4">
             <ActionContextProvider
               {...actionData}
               fields={actionData?.fields || defaultValues}

@@ -198,7 +198,7 @@ export default function Index() {
       </div>
       <div className="flex flex-col items-stretch border-b border-b-stone-400 px-4 py-16 lg:px-0">
         <CenteredView>
-          <div className="flex flex-row items-center gap-6 pb-8">
+          <div className="flex flex-row items-center gap-4 pb-8">
             <span className="text-2xl font-normal">
               {lenders.length} available{' '}
               {lenders.length === 1 ? 'loan' : 'loans'}

@@ -54,7 +54,7 @@ export function Toolbar(props: Props) {
           </div>
           <div className="grow" />
           {!currentUser && (
-            <div className="hidden flex-row items-stretch gap-6 md:flex">
+            <div className="hidden flex-row items-stretch gap-4 md:flex">
               {navItems.map((item) => (
                 <GhostButtonLink
                   key={item.text}

@@ -30,7 +30,7 @@ const ADMIN_LINKS: [string, string, Icon][] = [
   [AppLinks.Applications, 'Applications', Archive],
   [AppLinks.Lenders, 'Lenders', BuildingBank],
   [AppLinks.Admins, 'Admins', ShieldLock],
-  [AppLinks.Employment, 'Employment', Briefcase],
+  [AppLinks.EmploymentTypes, 'Employment Types', Briefcase],
 ] as const;
 const LENDER_LINKS: [string, string, Icon][] = [
   [AppLinks.MyAccount, 'My Account', User],

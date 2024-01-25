@@ -25,5 +25,7 @@ export const AppLinks = {
   ApplicationLenders: (id: number) => `/applications/${id}/lenders`,
   EditApplication: (id: number) => `/applications/${id}/edit`,
 
-  Employment: '/employment',
+  EmploymentTypes: '/employment-types',
+  EditEmploymentType: (id: number) => `/employment-types/${id}/edit`,
+  AddEmploymentType: '/employment-types/add',
 } as const;

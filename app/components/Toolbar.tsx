@@ -38,6 +38,13 @@ export function Toolbar(props: Props) {
           <ProgressBar />
         </div>
       )}
+      {!showProgressBar && (
+        <div className="flex flex-col items-stretch py-0">
+          <div className="relative h-1 rounded-full bg-transparent">
+            <div className="invisible absolute bottom-0 top-0 w-2/4 rounded-full bg-blue-600" />
+          </div>
+        </div>
+      )}
       <CenteredView>
         <div className="flex flex-row items-center justify-center p-4">
           <div className="flex flex-row items-end gap-4">
